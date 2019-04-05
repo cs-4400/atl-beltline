@@ -7,6 +7,8 @@ cur = conn.cursor()
 
 # create database
 create_db = 'CREATE DATABASE atl_beltline'
+
 cur.execute(create_db)
 
 # CREATE statements here
+

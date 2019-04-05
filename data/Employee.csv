@@ -1,0 +1,10 @@
+Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType
+james.smith,1,4043721234,123 East Main Street,Rochester,NY,14604,Admin
+michael.smith,2,4043726789,350 Ferst Drive,Atlanta,GA,30332,Staff
+robert.smith,3,1234567890,123 East Main Street,Columbus,OH,43215,Staff
+maria.garcia,4,7890123456,123 East Main Street,Richland,PA,17987,Manager
+david.smith,5,5124776435,350 Ferst Drive,Atlanta,GA,30332,Manager
+manager1,6,8045126767,123 East Main Street,Rochester,NY,14604,Manager
+manager2,7,9876543210,123 East Main Street,Rochester,NY,14604,Manager
+manager3,8,5432167890,350 Ferst Drive,Atlanta,GA,30332,Manager
+manager4,9,8053467565,123 East Main Street,Columbus,OH,43215,Manager

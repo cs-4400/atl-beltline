@@ -16,8 +16,8 @@ cur = conn.cursor()
 # "/get/"
 @app.route('/get/<username>')
 def user(username):
-    query = """SELECT * FROM user WHERE username = '%s'""" + username
-    cur.execute(query)
+    sql = """SELECT * FROM user WHERE dnumber = '%s'""" % (username)
+    cur.execute(sql)
 
 
 # write all the INSERT Statements here
