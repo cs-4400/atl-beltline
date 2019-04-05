@@ -30,8 +30,10 @@ CREATE TABLE user_email (
  
  To load data into the tables for testing select and insert statements, do the following steps for each table.
  
+ 1. right click on the table name
+ ![image](https://user-images.githubusercontent.com/34165109/55602483-e1843f80-5733-11e9-8ab6-1633bcf25371.png)
 
-![image](https://user-images.githubusercontent.com/34165109/55602356-2491e300-5733-11e9-8f01-fc9b6d63caf0.png)
+1. choose "Table Data Import Wizard", and a window pops up
 
 Locate the data file in the data directory 
 ![image](https://user-images.githubusercontent.com/34165109/55602356-2491e300-5733-11e9-8f01-fc9b6d63caf0.png)
