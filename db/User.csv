@@ -1,0 +1,19 @@
+Username,Password,Status,Firstname,Lastname
+james.smith,jsmith123,Approved,James,Smith
+michael.smith,msmith456,Approved,Michael,Smith
+robert.smith,rsmith789,Approved,Robert ,Smith
+maria.garcia,mgarcia123,Approved,Maria,Garcia
+david.smith,dsmith456,Approved,David,Smith
+manager1,manager1,Pending,Manager,One
+manager2,manager2,Approved,Manager,Two
+manager3,manager3,Approved,Manager,Three
+manager4,manager4,Approved,Manager,Four
+manager5,manager5,Approved,Manager,Five
+maria.rodriguez,mrodriguez,Declined,Maria,Rodriguez
+mary.smith,msmith789,Approved,Mary,Smith
+maria.hernandez,mhernandez,Approved,Maria,Hernandez
+staff1,staff1234,Approved,Staff,One
+staff2,staff4567,Approved,Staff,Two
+staff3,staff7890,Approved,Staff,Three
+user1,user123456,Pending,User,One
+visitor1,visitor123,Approved,Visitor,One

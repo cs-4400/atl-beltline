@@ -1,4 +1,5 @@
 import pymysql as mysql
+import MySQLdb
 
 # connect to server to create DB
 db = mysql.connect(host='localhost', user='root', password='root')
@@ -12,7 +13,8 @@ create_db = """CREATE DATABASE atl_beltline"""
 cur.execute(create_db)
 
 # connect to server to DB to create TABLES
-table = mysql.connect(host='localhost', user='root', password='root', db='atl_beltline')
+# table = db.connect(host='localhost', user='root', password='root', db='atl_beltline')
+table = MySQLdb.connect('localhost', 'root', 'root', 'atl_beltline', local_infile=True)
 cur = table.cursor()
 
 # CREATE statements here
@@ -22,11 +24,11 @@ cur.execute("DROP TABLE IF EXISTS user")
 user_table = """
 CREATE TABLE user (
     username varchar(255) NOT NULL,
-    lname varchar(255) NOT NULL,
-    fname varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
-    status ENUM('Approved','Pending', 'Declined'),
-    usertype ENUM('Employee','Visitor'),
+    status varchar(255) NOT NULL,
+    fname varchar(255) NOT NULL,
+    lname varchar(255) NOT NULL,
+    usertype varchar(255) NOT NULL,
     PRIMARY KEY (username))
 """
 
@@ -45,3 +47,12 @@ CREATE TABLE user_email (
 """
 
 cur.execute(email_table)
+
+# load_user = """
+# LOAD DATA LOCAL INFILE 'User.csv'
+# INTO TABLE atl_beltline.user
+# FIELDS TERMINATED BY ','
+# LINES TERMINATED BY '\n'
+# IGNORE 1 ROWS"""
+#
+# cur.execute(load_user)
