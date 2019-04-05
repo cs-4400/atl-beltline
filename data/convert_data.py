@@ -7,6 +7,7 @@ for file in os.listdir('.'):
         file = pd.read_excel(filename)
         file.to_csv('./' + os.path.splitext(filename)[0] + '.csv', sep=',', encoding='utf-8', index=False)
         # print(os.path.join(directory, filename))
+        os.remove(filename)
         continue
     else:
         continue
