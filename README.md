@@ -31,7 +31,7 @@ CREATE TABLE user_email (
  To load data into the tables for testing select and insert statements, do the following steps for each table.
  
 
-![image](https://user-images.githubusercontent.com/34165109/55602332-03c98d80-5733-11e9-9278-fe7c9eed5f7c.png)
+![image](https://user-images.githubusercontent.com/34165109/55602356-2491e300-5733-11e9-8f01-fc9b6d63caf0.png)
 
 Locate the data file in the data directory 
 ![image](https://user-images.githubusercontent.com/34165109/55602356-2491e300-5733-11e9-8f01-fc9b6d63caf0.png)
