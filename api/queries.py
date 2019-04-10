@@ -11,6 +11,8 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 
 
 """ QUERIES """
+
+""" LOGIN SCREEN"""
 validate_user = """SELECT email, pword, username1
     FROM (SELECT username as username1, email FROM user_email) email_t 
     JOIN 

@@ -29,6 +29,7 @@ def validate_login():
             'message': queries.email_not_exists,
             'username': username
         })
+
     if pw != data[0][1]:
         return json.dumps({
             'message': queries.wrong_pw,
