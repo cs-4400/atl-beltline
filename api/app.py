@@ -20,7 +20,6 @@ cur = conn.cursor()
 def validate_login():
     email = request.args.get('email')
     pw = request.args.get('password')
-    # email = '"m1@beltline.com"'
     query = queries.validate_user.format(email=email)
     cur.execute(query)
     data = cur.fetchall()
@@ -30,6 +29,12 @@ def validate_login():
             'message': queries.email_not_exists,
             'username': username
         })
+    if pw != data[0][1]:
+        return json.dumps({
+            'message': queries.wrong_pw,
+            'username': username
+        })
+
     username = '' + data[0][2] + ''
     return json.dumps({
         'message': queries.account_exists,
