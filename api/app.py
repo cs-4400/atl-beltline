@@ -1,10 +1,12 @@
 from flask import Flask
+from flask import request
 import MySQLdb
 import json
+from api import queries
 
 app = Flask(__name__)
 
-conn = MySQLdb.connect(host="localhost", user="root", passwd="root", db="company")  # name of the database
+conn = MySQLdb.connect(host="localhost", user="root", passwd="root", db="atl_beltline")  # name of the database
 
 # Create a Cursor object to execute queries.
 cur = conn.cursor()
@@ -14,33 +16,32 @@ cur = conn.cursor()
 # each statement should have its own method
 # and route, and should always prefix with
 # "/get/"
-@app.route('/get/<username>')
-def user(username):
-    sql = """SELECT * FROM user WHERE dnumber = '%s'""" % (username)
-    cur.execute(sql)
-
-
-# write all the INSERT Statements here
-# @app.route('/insert/')
+@app.route('/validate_login')
+def validate_login():
+    email = request.args.get('email')
+    pw = request.args.get('password')
+    # email = '"m1@beltline.com"'
+    query = queries.validate_user.format(email=email)
+    cur.execute(query)
+    data = cur.fetchall()
+    username = ''
+    if len(data) < 1:
+        return json.dumps({
+            'message': queries.email_not_exists,
+            'username': username
+        })
+    username = '' + data[0][2] + ''
+    return json.dumps({
+        'message': queries.account_exists,
+        'username': username
+    })
 
 
 @app.route('/')
 def main():
-    # Select data from table using SQL query.
-    dno = '1'
-    sql = """SELECT * FROM department WHERE dnumber = '%s'""" % (dno)
-
-    cur.execute(sql)
-
-    # print the first and second columns
-    data = []
-    for row in cur.fetchall():
-        value = {}
-        value[row[0]] = int(row[1])
-        data.append(value)
-        print(row[0], " ", row[1])
-    print(data)
-    return json.dumps({"data": data})
+    return json.dumps({
+        "test": "pass"
+    })
 
 
 if __name__ == "__main__":

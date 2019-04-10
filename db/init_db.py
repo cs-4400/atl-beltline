@@ -22,14 +22,15 @@ cur = table.cursor()
 # USER TABLE
 cur.execute("DROP TABLE IF EXISTS user")
 user_table = """
-CREATE TABLE user (
-    username varchar(255) NOT NULL,
-    password varchar(255) NOT NULL,
-    status varchar(255) NOT NULL,
-    fname varchar(255) NOT NULL,
-    lname varchar(255) NOT NULL,
-    usertype varchar(255) NOT NULL,
-    PRIMARY KEY (username))
+CREATE TABLE atl_beltline.user (
+  username varchar(255) NOT NULL,
+  pword varchar(255) NOT NULL,
+  ustatus ENUM('Approved','Pending', 'Declined'),
+  fname varchar(255) NOT NULL,
+  lname varchar(255) NOT NULL,
+  utype ENUM('Employee','Visitor'),
+  PRIMARY KEY (username)
+)
 """
 
 cur.execute(user_table)
@@ -48,11 +49,3 @@ CREATE TABLE user_email (
 
 cur.execute(email_table)
 
-# load_user = """
-# LOAD DATA LOCAL INFILE 'User.csv'
-# INTO TABLE atl_beltline.user
-# FIELDS TERMINATED BY ','
-# LINES TERMINATED BY '\n'
-# IGNORE 1 ROWS"""
-#
-# cur.execute(load_user)
