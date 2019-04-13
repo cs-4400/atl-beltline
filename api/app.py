@@ -1,24 +1,23 @@
 from flask import Flask
 from flask import request
-import MySQLdb
+# import MySQLdb
+import pymysql as mysql
 import json
 from api import queries
 
 app = Flask(__name__)
 
-conn = MySQLdb.connect(host="localhost", user="root", passwd="root", db="atl_beltline")  # name of the database
+conn = mysql.connect(host="localhost", user="root", passwd="root", db="atl_beltline")  # name of the database
 
 # Create a Cursor object to execute queries.
 cur = conn.cursor()
 
 
-# write all the SELECT statements here
-# each statement should have its own method
-# and route, and should always prefix with
-# "/get/"
+# EACH SCREEN SHOULD HAVE ITS OWN ROUTE
+#
 @app.route('/validate_login')
 def validate_login():
-    email = request.args.get('email')
+    email = request.args.get('email') #
     pw = request.args.get('password')
     query = queries.validate_user.format(email=email)
     cur.execute(query)

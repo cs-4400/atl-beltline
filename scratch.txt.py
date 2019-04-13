@@ -130,4 +130,19 @@ CREATE TABLE atl_beltline.assign_to (
 
 
 
-
+SELECT
+    visit_date, event1.ename, event1.sname, price, num_log, (num_log * price) as revenue
+FROM
+    (SELECT
+        visit_date, ename, sname, count(*) as num_log
+    FROM
+        atl_beltline.visit_event group by visit_date, ename) event1
+        JOIN
+    (SELECT
+        price, ename, sname, start_date, end_date
+    FROM
+        atl_beltline.event) event2
+WHERE
+    (event1.ename = event2.ename
+        AND event1.sname = event2.sname
+        AND event1.visit_date BETWEEN event2.start_date AND event2.end_date);

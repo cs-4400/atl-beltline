@@ -1,5 +1,5 @@
 import pymysql as mysql
-import MySQLdb
+# import MySQLdb
 
 # connect to server to create DB
 db = mysql.connect(host='localhost', user='root', password='root')
