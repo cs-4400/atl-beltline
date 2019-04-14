@@ -7,7 +7,7 @@ from api import queries
 
 app = Flask(__name__)
 
-conn = mysql.connect(host="localhost", user="root", passwd="root", db="atl_beltline")  # name of the database
+conn = mysql.connect(host="localhost", user="cs4400user", passwd="password", db="atl_beltline")  # name of the database
 
 # Create a Cursor object to execute queries.
 cur = conn.cursor()

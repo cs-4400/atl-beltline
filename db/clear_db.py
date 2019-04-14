@@ -1,14 +1,14 @@
 # import the mysql client for python
 
-import MySQLdb as mySql
+import pymysql as mySql
 
 # Create a connection object
 
 dbIP = "localhost"  # IP address of the MySQL database server
 
-dbUserName = "root"  # User name of the database server
+dbUserName = "cs4400user"  # User name of the database server
 
-dbUserPassword = "root"  # Password for the database user
+dbUserPassword = "password"  # Password for the database user
 
 databaseForDeletion = "atl_beltline"  # Name of the database that is to be deleted
 
