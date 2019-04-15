@@ -42,6 +42,19 @@ def validate_login():
     })
 
 
+# @app.route('/register_user')
+# def register_user():
+#
+#     email = request.args.get('email')  #
+#     pw = request.args.get('password')
+#     fname = request.args.get('FirstName')
+#
+#
+#     return json.dumps({
+#         "test:" "register_user"
+#     })
+
+
 @app.route('/')
 def main():
     return json.dumps({

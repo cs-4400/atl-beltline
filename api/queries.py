@@ -14,7 +14,7 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 
 # 1) LOGIN SCREEN
 validate_user = """
-SELECT email, pword, username1
-    FROM (SELECT username as username1, email FROM user_email) email_t 
+SELECT email, password, username1
+    FROM (SELECT Username as username1, Email FROM user_email) email_t 
     JOIN 
-    (SELECT username, pword FROM user) user_t ON (user_t.username = email_t.username1) where email=\"{email}\""""
+    (SELECT username, pword FROM user) user_t ON (user_t.Username = email_t.username1) where email=\"{email}\""""
