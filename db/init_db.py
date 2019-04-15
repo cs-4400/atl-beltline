@@ -2,7 +2,7 @@ import pymysql as mysql
 # import MySQLdb
 
 # connect to server to create DB
-db = mysql.connect(host='localhost', user='root', password='root')
+db = mysql.connect(host='localhost', user='cs4400user', password='password')
 cur = db.cursor()
 
 # IF the database already exists, DROP
@@ -14,7 +14,7 @@ cur.execute(create_db)
 
 # connect to server to DB to create TABLES
 # table = db.connect(host='localhost', user='root', password='root', db='atl_beltline')
-table = MySQLdb.connect('localhost', 'root', 'root', 'atl_beltline', local_infile=True)
+table = mysql.connect('localhost', 'cs4400user', 'password', 'atl_beltline', local_infile=True)
 cur = table.cursor()
 
 # CREATE statements here
@@ -28,7 +28,7 @@ CREATE TABLE atl_beltline.user (
   ustatus ENUM('Approved','Pending', 'Declined'),
   fname varchar(255) NOT NULL,
   lname varchar(255) NOT NULL,
-  utype ENUM('Employee','Visitor'),
+  utype ENUM('Employee','Visitor', 'Employee, Visitor', 'User'),
   PRIMARY KEY (username)
 )
 """
