@@ -70,25 +70,11 @@ def register_user():
     if len(exist) > 0:
         return queries.email_already_exists + " or " + queries.username_taken
     cur.execute(query)
-    return str(status.HTTP_200_OK)
+    return queries.register_successfully
 
 
 @app.route('/')
 def main():
-    # user = request.args.get('username')
-    # query = queries.get_transit.format(username=user)
-    # cur.execute(query)
-    # data = cur.fetchall()
-    # print(data[0][0])
-    # transitList = []
-    #
-    # for dat in data:
-    #     transit = {}
-    #     transit['date'] = str(dat[0])
-    #     transit['route'] = dat[1]
-    #     transit['type'] = dat[2]
-    #     transit['price'] = dat[3]
-    #     transitList.append(transit)
     return json.dumps({
         "test": 'pass'
     })
