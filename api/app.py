@@ -6,6 +6,7 @@ import json
 from api import queries
 from api import register_queries
 from flask_cors import CORS
+from flask_api import status
 
 app = Flask(__name__)
 CORS(app)
@@ -45,6 +46,31 @@ def validate_login():
         'password': password,
         'user_type': user_type
     })
+
+
+@app.route('/register_user', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    username = data['username']
+    email = data['email']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    user_type = data['user_type']
+    query = register_queries.register_user.format(
+            username,
+            email,
+            fname,
+            lname,
+            pw,
+            user_type)
+    check_exist = register_queries.check_exist.format(email)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        return queries.email_already_exists + " or " + queries.username_taken
+    cur.execute(query)
+    return str(status.HTTP_200_OK)
 
 
 

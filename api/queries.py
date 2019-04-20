@@ -34,7 +34,11 @@ FROM
 transit_history = """
 call transit_history(\"{username}\")
 """
+# insert
 
+get_transit = """
+call transit_history(\"{username}\")
+"""
 # =================================================================
 # Screen 17
 e_manage_user = """
