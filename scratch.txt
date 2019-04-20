@@ -1,148 +1,127 @@
-create database atl_beltline;
+DROP DATABASE if exists atlanta_beltline;
+CREATE DATABASE atlanta_beltline;
+USE atlanta_beltline;
 
-CREATE TABLE atl_beltline.user (
- username varchar(100) NOT NULL,
- pword varchar(50) NOT NULL,
- ustatus ENUM('Approved','Pending', 'Declined'),
- fname varchar(255) NOT NULL,
- lname varchar(255) NOT NULL,
- utype ENUM('Employee','Visitor', 'Employee, Visitor', 'User'),
- PRIMARY KEY (username)
+DROP TABLE if exists user;
+CREATE TABLE user (
+	username VARCHAR(50) NOT NULL,
+	password VARCHAR(50) NOT NULL,
+	first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+	status ENUM("Pending", "Approved", "Declined") DEFAULT "Pending",
+  user_type ENUM('Employee','Visitor', 'Employee, Visitor', 'User'),
+  PRIMARY KEY (username)
 );
 
-CREATE TABLE atl_beltline.user_email (
-  username varchar(100) NOT NULL,
-  email varchar(100) NOT NULL,
-  PRIMARY KEY (email),
-  UNIQUE (email),
-  FOREIGN KEY (username) REFERENCES user (username)
-  ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists user_email;
+CREATE TABLE user_email (
+	username VARCHAR(50) NOT NULL,
+	email VARCHAR(75) NOT NULL,
+	Primary Key (username, email),
+	Foreign Key (username) references user (username) on delete cascade on update cascade
 );
 
-CREATE TABLE atl_beltline.employee (
- username varchar(100) NOT NULL,
- emp_id char(15) NOT NULL,
- phone char(10) NOT NULL,
- address varchar(255) NOT NULL,
- city varchar(255) NOT NULL,
- state char(2) NOT NULL,
- zipcode char(5) NOT NULL,
- emp_type ENUM('Admin', 'Manager', 'Staff'),
- PRIMARY KEY (emp_id),
- FOREIGN KEY (username) REFERENCES user (username)
- ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists employee;
+CREATE TABLE employee (
+	username VARCHAR(50) NOT NULL,
+	emp_ID INT NOT NULL,
+	phone VARCHAR(10) NOT NULL,
+	address VARCHAR(95),
+	city VARCHAR(50),
+	state VARCHAR(3),
+	zip INT,
+	emp_type ENUM('Admin', 'Manager', 'Staff'),
+	Primary Key (emp_ID),
+	Foreign Key (username) references user (username) on delete cascade on update cascade
 );
 
-
-CREATE TABLE atl_beltline.site (
-site_name varchar(255) NOT NULL,
-site_address varchar(255),
-zipcode int NOT NULL,
-opening ENUM('Yes', 'No'),
-site_manager char(15) NOT NULL,
-PRIMARY KEY (site_name),
-FOREIGN KEY (site_manager) REFERENCES user (username)
-ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists site;
+CREATE TABLE site (
+	name VARCHAR(50) NOT NULL,
+	address VARCHAR(95),
+	zipcode INT,
+	open_everyday VARCHAR(50),
+	manager_username VARCHAR(55) NOT NULL,
+	Primary Key (name),
+	Foreign key (manager_username) references user (username) on delete cascade on update cascade
 );
 
-CREATE TABLE atl_beltline.visit_site (
- username varchar(100) NOT NULL,
- sname varchar(255) NOT NULL,
- visit_date date NOT NULL,
- PRIMARY KEY (username, sname, visit_date),
- FOREIGN KEY (username) REFERENCES user (username)
- ON DELETE CASCADE ON UPDATE CASCADE,
- FOREIGN KEY (sname) REFERENCES site (site_name)
- ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists visit_site;
+CREATE TABLE visit_site (
+	username VARCHAR(50)  NOT NULL,
+	site_name VARCHAR(50) NOT NULL,
+	visit_date DATE NOT NULL,
+	Primary Key (username, visit_date, site_name),
+	Foreign Key (username) references user (username) on delete cascade on update cascade,
+	Foreign Key (site_name) references site (name) on delete cascade on update cascade
 );
 
-CREATE TABLE atl_beltline.event (
-ename varchar(255) NOT NULL,
-start_date date NOT NULL,
-sname varchar(255) NOT NULL,
-end_date date NOT NULL,
-price double NOT NULL,
-capacity int NOT NULL,
-min_staff int NOT NULL,
-edescription TEXT NOT NULL,
-PRIMARY KEY (ename, start_date),
-FOREIGN KEY (sname) REFERENCES site (site_name)
-ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE atl_beltline.visit_event (
- vname varchar(100) NOT NULL,
- ename varchar(255) NOT NULL,
- estart_date date NOT NULL,
- sname varchar(255) NOT NULL,
- visit_date date NOT NULL,
- PRIMARY KEY (visit_date, vname, estart_date, ename),
- FOREIGN KEY (vname) REFERENCES user (username)
- ON DELETE CASCADE ON UPDATE CASCADE,
- FOREIGN KEY (ename, estart_date) REFERENCES event (ename, start_date)
- ON DELETE CASCADE ON UPDATE CASCADE,
- FOREIGN KEY (sname) REFERENCES site (site_name)
- ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE atl_beltline.transit (
- transit_type varchar(100) NOT NULL,
- route1 varchar(50) NOT NULL,
- price double NOT NULL,
- PRIMARY KEY (transit_type, route1)
-);
-
-CREATE TABLE atl_beltline.connect (
-  site_name varchar(255) NOT NULL,
-  t_type varchar(100) NOT NULL,
-  route varchar(50) NOT NULL,
-  PRIMARY KEY (site_name, t_type, route),
-  FOREIGN KEY (site_name) REFERENCES site (site_name)
-  ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (t_type, route) REFERENCES transit (transit_type, route1)
-  ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE atl_beltline.take (
- username varchar(100) NOT NULL,
- t_type varchar(100) NOT NULL,
- route varchar(50) NOT NULL,
- take_date date NOT NULL,
- PRIMARY KEY (route, t_type, take_date, username),
- FOREIGN KEY (t_type, route) REFERENCES transit (transit_type, route1)
- ON DELETE CASCADE ON UPDATE CASCADE,
- FOREIGN KEY (username) REFERENCES user (username)
- ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists event;
+CREATE TABLE event (
+	event_name VARCHAR(50) NOT NULL,
+	event_start DATE NOT NULL,
+	site_name VARCHAR(50) NOT NULL,
+	end_date DATE,
+	event_price INT,
+	capacity INT,
+	min_staff INT,
+	description TEXT,
+	Primary Key (event_name, event_start, site_name),
+	Foreign Key (site_name) references site (name) on delete cascade on update cascade
 );
 
 
-CREATE TABLE atl_beltline.assign_to (
-  emp_id char(15) NOT NULL,
-  event_name varchar(255) NOT NULL,
-  start_date date NOT NULL,
-  site_name varchar(255) NOT NULL,
-  PRIMARY KEY (emp_id, event_name, start_date),
-  FOREIGN KEY (emp_id) REFERENCES user (username)
-  ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (event_name, start_date) REFERENCES event (ename, start_date)
-  ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE if exists visit_event;
+CREATE TABLE visit_event (
+	username VARCHAR(50) NOT NULL,
+	event_name VARCHAR(50) NOT NULL,
+	event_start DATE NOT NULL,
+	site_name VARCHAR(50) NOT NULL,
+	visit_date DATE NOT NULL,
+	Primary Key (username, visit_date, event_name, event_start, site_name),
+	Foreign Key (username) references user (username) on delete cascade on update cascade,
+	Foreign Key (event_name, event_start) references event (event_name, event_start) on delete cascade on update cascade,
+	Foreign Key (site_name) references site (name) on delete cascade on update cascade
+);
+
+DROP TABLE if exists assign_to;
+CREATE TABLE assign_to (
+	staff_username VARCHAR(55) NOT NULL,
+	event_name VARCHAR(50) NOT NULL,
+	event_start DATE NOT NULL,
+	site_name VARCHAR(50) NOT NULL,
+	Primary Key (staff_username, event_name, event_start, site_name),
+	Foreign Key (staff_username) references user (username) on delete cascade on update cascade,
+	Foreign Key (event_name, event_start) references event (event_name, event_start) on delete cascade on update cascade,
+	Foreign Key (site_name) references site (name) on delete cascade on update cascade
 );
 
 
+DROP TABLE if exists transit;
+CREATE TABLE transit (
+	type VARCHAR(25) NOT NULL,
+	route VARCHAR(25) NOT NULL,
+	price FLOAT,
+	Primary Key (type, route)
+);
 
-SELECT
-    visit_date, event1.ename, event1.sname, price, num_log, (num_log * price) as revenue
-FROM
-    (SELECT
-        visit_date, ename, sname, count(*) as num_log
-    FROM
-        atl_beltline.visit_event group by visit_date, ename) event1
-        JOIN
-    (SELECT
-        price, ename, sname, start_date, end_date
-    FROM
-        atl_beltline.event) event2
-WHERE
-    (event1.ename = event2.ename
-        AND event1.sname = event2.sname
-        AND event1.visit_date BETWEEN event2.start_date AND event2.end_date);
+DROP TABLE if exists connects;
+CREATE TABLE connects (
+	site_name VARCHAR(50) NOT NULL,
+	transit_type VARCHAR(25) NOT NULL,
+	transit_route VARCHAR(25) NOT NULL,
+	Primary Key(site_name, transit_type, transit_route),
+	Foreign Key (site_name) references site (name) on delete cascade on update cascade,
+        	Foreign Key (transit_type, transit_route) references transit (type, route) on delete cascade on update cascade
+);
+
+DROP TABLE if exists take_transit;
+CREATE TABLE take_transit (
+	username VARCHAR(50) NOT NULL,
+	type VARCHAR(25) NOT NULL,
+	route VARCHAR(25) NOT NULL,
+	date DATE NOT NULL,
+	Primary Key(username, date, type, route),
+	Foreign Key (username) references user (username) on delete cascade on update cascade,
+	Foreign Key (type, route) references transit (type, route) on delete cascade on update cascade
+);

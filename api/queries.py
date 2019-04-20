@@ -6,7 +6,7 @@ email_already_exists = "EMAIL_ALREADY_EXISTS"
 
 
 # SUCCESS MESSAGES
-account_exists = "ACCOUNT_EXISTS"
+account_exists = "LOGIN_SUCCESSFULLY"
 register_successfully = "REGISTER_SUCCESSFULLY"
 
 
@@ -14,7 +14,21 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 
 # 1) LOGIN SCREEN
 validate_user = """
-SELECT email, pword, username1
-    FROM (SELECT username as username1, email FROM user_email) email_t 
-    JOIN 
-    (SELECT username, pword FROM user) user_t ON (user_t.username = email_t.username1) where email=\"{email}\""""
+call login_user(\"{email}\")"""
+
+get_users = """
+SELECT 
+    email, password, uname1, user_type,
+FROM
+    (SELECT 
+        username AS uname1, email
+    FROM
+        user_email) email_t
+        JOIN
+    (SELECT 
+        username AS uname2, user_type, password
+    FROM
+        user) user_t ON (email_t.uname1 = user_t.uname2)
+"""
+
+
