@@ -73,10 +73,48 @@ def register_user():
     return queries.register_successfully
 
 
+
+# @app.route('/register_vistor')
+# def register_visitor():
+#     pass
+
+@app.route('/transit_history')
+def transit_history():
+    username = request.args.get('username')
+    query = queries.transit_history.format(username=username)
+    cur.execute(query)
+    data = cur.fetchall()
+
+
+    # if len(data) < 1:
+    #     return json.dumps({
+    #         'message': queries.email_not_exists,
+    #     })
+
+    transitList = []
+
+    for transit in data:
+        tran = {}
+        tran['date'] = str(transit[0])
+        tran['route'] = transit[1]
+        tran['transport_type'] = transit[2]
+        tran['price'] = transit[3]
+        transitList.append(tran)
+
+    return json.dumps(
+        transitList
+    )
+
+
+@app.route('/e_manage_profile')
+def e_manage_profile():
+    pass
+
+
 @app.route('/')
 def main():
     return json.dumps({
-        "test": 'pass'
+        "test": "pass"
     })
 
 

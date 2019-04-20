@@ -8,7 +8,6 @@ email_already_exists = "EMAIL_ALREADY_EXISTS"
 account_exists = "LOGIN_SUCCESSFULLY"
 register_successfully = "REGISTER_SUCCESSFULLY"
 
-
 # QUERIES
 
 # 1) LOGIN SCREEN
@@ -30,8 +29,18 @@ FROM
         user) user_t ON (email_t.uname1 = user_t.uname2)
 """
 
+# =================================================================
+# Screen 16
+transit_history = """
+call transit_history(\"{username}\")
+"""
 # insert
 
 get_transit = """
 call transit_history(\"{username}\")
+"""
+# =================================================================
+# Screen 17
+e_manage_user = """
+
 """
