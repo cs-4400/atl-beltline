@@ -4,6 +4,7 @@ from flask import request
 import pymysql as mysql
 import json
 from api import queries
+from api import register_queries
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -44,6 +45,44 @@ def validate_login():
         'password': password,
         'user_type': user_type
     })
+
+
+
+# @app.route('/register_vistor')
+# def register_visitor():
+#     pass
+
+@app.route('/transit_history')
+def transit_history():
+    username = request.args.get('username')
+    query = queries.transit_history.format(username=username)
+    cur.execute(query)
+    data = cur.fetchall()
+
+
+    # if len(data) < 1:
+    #     return json.dumps({
+    #         'message': queries.email_not_exists,
+    #     })
+
+    transitList = []
+
+    for transit in data:
+        tran = {}
+        tran['date'] = str(transit[0])
+        tran['route'] = transit[1]
+        tran['transport_type'] = transit[2]
+        tran['price'] = transit[3]
+        transitList.append(tran)
+
+    return json.dumps(
+        transitList
+    )
+
+
+@app.route('/e_manage_profile')
+def e_manage_profile():
+    pass
 
 
 @app.route('/')
