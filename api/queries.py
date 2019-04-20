@@ -4,7 +4,6 @@ email_not_exists = "EMAIL_NOT_EXISTS"
 username_taken = "USERNAME_TAKEN"
 email_already_exists = "EMAIL_ALREADY_EXISTS"
 
-
 # SUCCESS MESSAGES
 account_exists = "LOGIN_SUCCESSFULLY"
 register_successfully = "REGISTER_SUCCESSFULLY"
@@ -31,4 +30,8 @@ FROM
         user) user_t ON (email_t.uname1 = user_t.uname2)
 """
 
+# insert
 
+get_transit = """
+call transit_history(\"{username}\")
+"""

@@ -4,7 +4,9 @@ from flask import request
 import pymysql as mysql
 import json
 from api import queries
+from api import register_queries
 from flask_cors import CORS
+from flask_api import status
 
 app = Flask(__name__)
 CORS(app)
@@ -46,10 +48,49 @@ def validate_login():
     })
 
 
+@app.route('/register_user', methods=['POST'])
+def register_user():
+    data = request.get_json()
+    username = data['username']
+    email = data['email']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    user_type = data['user_type']
+    query = register_queries.register_user.format(
+            username,
+            email,
+            fname,
+            lname,
+            pw,
+            user_type)
+    check_exist = register_queries.check_exist.format(email)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        return queries.email_already_exists + " or " + queries.username_taken
+    cur.execute(query)
+    return str(status.HTTP_200_OK)
+
+
 @app.route('/')
 def main():
+    # user = request.args.get('username')
+    # query = queries.get_transit.format(username=user)
+    # cur.execute(query)
+    # data = cur.fetchall()
+    # print(data[0][0])
+    # transitList = []
+    #
+    # for dat in data:
+    #     transit = {}
+    #     transit['date'] = str(dat[0])
+    #     transit['route'] = dat[1]
+    #     transit['type'] = dat[2]
+    #     transit['price'] = dat[3]
+    #     transitList.append(transit)
     return json.dumps({
-        "test": "pass"
+        "test": 'pass'
     })
 
 
