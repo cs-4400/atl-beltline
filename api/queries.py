@@ -33,11 +33,11 @@ FROM
 
 # =================================================================
 # Screen 15
-get_tranits = """
+get_transit = """
 call get_transits()
 """
 log_transit = """
-call log_transit(\"{username}\", \"{type}\", \"{route}\", \"{date}\"}
+call log_transit(\"{}\", \"{}\", \"{}\", \"{}\")
 """
 # log_transit(IN p_username varchar(50), IN p_type varchar(25), IN p_route varchar(25),
 #                              IN p_transit_date date)
@@ -96,7 +96,7 @@ call display_transit(\"{type}\", \"{route}\")
 # display_transit(IN p_type varchar(25), IN p_route varchar(25))
 
 update_transit = """
-call update_transit(\"{old_type}\", \"{old_route}\", \"{type}\", \"{route}\", \"{price}\", \"{connected_sites}\")
+call update_transit(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")
 """
 # update_transit(IN p_old_type varchar(25), IN p_old_route varchar(25), IN p_type varchar(25),
 #                                 IN p_route varchar(25), IN p_price float, IN p_connected_sites varchar(255))
@@ -104,7 +104,7 @@ call update_transit(\"{old_type}\", \"{old_route}\", \"{type}\", \"{route}\", \"
 # =================================================================
 # Screen 24
 create_transit = """
-call create_transit(\"{type}\", \"{route}\", \"{price}\", \"{connected_sites}\")
+call create_transit(\"{}\", \"{}\", \"{}\", \"{}\")
 """
 # create_transit(IN p_type varchar(25), IN p_route varchar(25), IN p_price float,
 #                                 IN p_connected_sites varchar(255))
@@ -133,7 +133,7 @@ call event_report(\"{name}\",\"{date}\",\"{price}\")
 # event_report(IN e_name varchar(50), IN s_date date, IN price decimal(10, 2))
 
 update_event = """
-call update_event(\"{name}\",\"{date}\", \"{description}\",\"{staff_assigned}\")
+call update_event(\"{}\",\"{}\", \"{}\",\"{}\")
 """
 # update_event(IN e_name varchar(50), IN s_date date, IN new_description varchar(255),
 #                               IN staff_assigned varchar(255))
@@ -147,7 +147,7 @@ call get_available_staff(\"{start_date}\",\"{end_date}\")
 # get_available_staff(IN p_start_date date, IN p_end_date date)
 
 create_event = """
-call create_event(\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\",\"{start_date}\")
+call create_event(\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\")
 """
 # create_event(IN p_event_name varchar(50), IN p_event_start date, IN p_end_date date,
 #                               IN p_min_staff int, IN p_site_name varchar(50), IN p_price float, IN p_capacity int,
@@ -183,7 +183,7 @@ call get_schedule(\"{}\")
 # =================================================================
 # Screen 32 #WARNING IF DIDN'T WORK MAKE SURE THE RIGHT VERSION OF SQL SCRIPT IS RUN
 get_event_staff_detail = """
-call get_event_staff_detail(\"{}\", \"{}\", \"{}\")
+call get_event_staff_detail(\'{}\', \'{}\', \'{}\')
 """
 # get_event_staff_detail(IN p_event_name varchar(50), IN p_site_name varchar(50), IN p_start_date date)
 # =================================================================
@@ -196,12 +196,12 @@ call explore_event(\"{username}\")
 # =================================================================
 # Screen 34
 get_event_detail = """
-call get_event_detail(\"{}\", \"{}\", \"{}\")
+call get_event_detail(\'{}\', \'{}\', \'{}\')
 """
 # get_event_detail(IN p_name varchar(50), IN p_site_name varchar(50), IN p_start_date date)
 
 log_event_visit = """
-call log_event_visit(\"{username}\",\"{event_name}\",\"{event_start}\", \"{site_name}\, \"{visit_date}\)
+call log_event_visit(\"{}\",\"{}\",\"{}\", \"{}\, \"{}\)
 """
 # log_event_visit(
 #     IN p_username varchar(50),
@@ -224,9 +224,9 @@ call get_transit_detail(\"{}\",\"{}\")
 # get_transit_detail(IN p_type varchar(25), IN p_route varchar(25))
 
 #NOTE log_transit is created TWICE
-log_transit = """ 
-call log_transit(\"{username}\", \"{type}\", \"{route}\", \"{date}\")
-"""
+# log_transit = """
+# call log_transit(\"{username}\", \"{type}\", \"{route}\", \"{date}\")
+# """
 # =================================================================
 # Screen 37
 get_site_detail = """

@@ -172,13 +172,7 @@ def takes_transit():
         except mysql.err.IntegrityError:
             return log_queries.already_logged
     else:
-        return ''
-
-    if request.method == 'POST':
-        data = request.get_json()
-
-    else:
-        query = queries.get_tranits
+        query = queries.get_transit
         cur.execute(query)
         data = cur.fetchall()
 
@@ -195,9 +189,6 @@ def takes_transit():
         return json.dumps(
             transitList
         )
-
-
-
 
 @app.route('/transit_history') #Screen 16
 def transit_history():
@@ -323,24 +314,22 @@ def a_edit_site():
         ])
 
 
-@app.route('/create_site', methods=['POST']) #Screen 21
 @app.route('/a_create_site', methods=['GET', 'POST']) #Screen 21
 def a_create_site():
-    data = request.get_json()
-    name = data['name']
-    address = data['address']
-    zip = data['zip']
-    manager = data['manager']
-    open = data['open']
-    query = site_queries.create_site.format(name, address, zip, manager, open)
-    print(query)
-    try:
-        cur.execute(query)
-    except:
-        print()
     if request.method == 'POST':
         data = request.get_json()
-
+        name = data['name']
+        address = data['address']
+        zip = data['zip']
+        manager = data['manager']
+        open = data['open']
+        query = site_queries.create_site.format(name, address, zip, manager, open)
+        print(query)
+        try:
+            cur.execute(query)
+            return "ITSALLGOOD"
+        except:
+            return "ITS BROKEN"
 
     else:
         query = queries.get_unassigned_managers
@@ -358,13 +347,9 @@ def a_create_site():
             managerList
         )
 
-
-
-
-@app.route('/manage_transit') #Screen 22
+# Screen 22
+@app.route('/manage_transit')
 def a_manage_transit():
-
-
     query = queries.manage_transit
     cur.execute(query)
     data = cur.fetchall()
@@ -384,13 +369,41 @@ def a_manage_transit():
         transitList
     )
 
-@app.route('/a_edit_transit', methods=['GET', 'POST']) #Screen 23
+# Screen 23 : POST DONE, GET NOT DONE
+@app.route('/a_edit_transit', methods=['GET', 'POST'])
 def a_edit_transit():
-    pass
+    if request.method == 'POST':
+        data = request.get_json()
+        old_type = data['old_type']
+        old_route = data['old_route']
+        new_type = data['type']
+        new_route = data['route']
+        new_price = data['price']
+        sites = data['sites']
+        query = queries.update_transit.format(old_type, old_route, new_type,
+                                              new_route, new_price, sites)
+        try:
+            cur.execute(query)
+            return "ITSALLGOOD"
+        except:
+            print("ITAINTGOOD, YOUGOTERROR")
+
+    else:
+        print("IM IN COMPLETE")
 
 @app.route('/a_create_transit', methods=['POST']) #Screen 24
 def a_create_transit():
-    pass
+    data = request.get_json()
+    type = data['type']
+    route = data['route']
+    price = data['price']
+    connected_sites = data['sites']
+    query = queries.create_transit.format(type, route, price, connected_sites)
+    try:
+        cur.execute(query)
+        return "ITSALLGOOD"
+    except:
+        return "YOUHAVEFAILEDME"
 
 @app.route('/m_manage_event') #Screen 25
 def m_manage_event():
@@ -413,14 +426,45 @@ def m_manage_event():
         eventList
     )
 
-@app.route('/m_edit_event') #Screen 26 --Come back to later...  may need multiple urls or extensions
+@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26 --Come back to later...  may need multiple urls or extensions
 def m_edit_event():
-    pass
+    if request.method == 'POST':
+        data = request.get_json()
+        event_name = data['event_name']
+        event_start = data['event_start']
+        description = data['new_descr']
+        staffs = data['staffs']
+        query = queries.update_event.format(event_name, event_start, description, staffs)
+        print(query)
+        try:
+            cur.execute(query)
+            return "ITSALLGOOD"
+        except:
+            print("BIGFATERROR")
 
-@app.route('/m_create_event', methods=['GET', 'POST']) #Screen 27
+    else:
+        print('FINISH ME')
+
+
+# Screen 27
+@app.route('/m_create_event', methods=['GET', 'POST'])
 def m_create_event():
     if request.method == 'POST':
         data = request.get_json()
+        event_name = data['event_name']
+        event_start = data['event_start']
+        site_name = data['site_name']
+        end_date = data['end_date']
+        min_staff = data['min_staff']
+        price = data['price']
+        capacity = data['capacity']
+        description = data['description']
+        staffs = data['staffs']
+        query = queries.create_event.format(event_name, event_start,
+                                     end_date, min_staff, site_name,
+                                     price, capacity, description, staffs)
+        cur.execute(query)
+        return "ITSALLGOOD"
 
     else:
         start_date = request.args.get('start_date')
@@ -441,7 +485,8 @@ def m_create_event():
         )
 
 
-@app.route('/m_manage_staff') #Screen 28 - DONE
+# Screen 28
+@app.route('/m_manage_staff')
 def m_manage_staff():
     site_name = request.args.get('site_name')
     query = queries.filter_staff.format(site_name=site_name)
@@ -460,7 +505,8 @@ def m_manage_staff():
         staffList
     )
 
-@app.route('/m_site_report') #Screen 29
+# Screen 29
+@app.route('/m_site_report')
 def m_site_report():
     site_name = request.args.get('site_name')
     start_date = request.args.get('start_date')
@@ -485,7 +531,8 @@ def m_site_report():
     )
 
 
-@app.route('/m_daily_detail') #Screen 30
+# Screen 30
+@app.route('/m_daily_detail')
 def m_daily_detail():
     manager_username = request.args.get('manager_username')
     site = request.args.get('site')
@@ -509,8 +556,8 @@ def m_daily_detail():
     )
 
 
-
-@app.route('/s_view_schedule') #Screen 31 - DONE
+# Screen 31
+@app.route('/s_view_schedule')
 def s_view_schedule():
     staff_username = request.args.get('staff_username')
     query = queries.get_schedule.format(staff_username)
@@ -533,18 +580,21 @@ def s_view_schedule():
     )
 
 
-@app.route('/s_event_detail') #Screen 32 -ALMOST DONE FIGURE OUT HOW TO LOOP THROUGH EMPLOYEE LIST
+# Screen 32 -----------FRANK MARKED NOT DONE
+@app.route('/s_event_detail')
 def s_event_detail():
     event_name = request.args.get('event_name')
     site_name = request.args.get('site_name')
     start_date = request.args.get('start_date')
     query = queries.get_event_staff_detail.format(event_name, site_name, start_date)
+    print(query)
     cur.execute(query)
-    data = cur.fetchall()
+    staffs = cur.fetchall()
 
+    print(staffs)
     eventList = []
 
-    for events in data:
+    for events in staffs:
         event = {}
         event['event'] = events[0]
         event['site'] = events[1]
@@ -561,8 +611,8 @@ def s_event_detail():
         eventList
     )
 
-
-@app.route('/v_explore_event') #Screen 33 - DONE
+# Screen 33
+@app.route('/v_explore_event')
 def v_explore_event():
     username = request.args.get('username')
     query = queries.explore_event.format(username=username)
@@ -585,19 +635,22 @@ def v_explore_event():
         eventList
     )
 
-@app.route('/v_event_detail', methods=['GET', 'POST']) #Screen 34 - GET DONE, POST NOT DONE
+# Screen 34
+@app.route('/v_event_detail', methods=['GET', 'POST'])
 def v_event_detail():
     if request.method == 'POST':
         data = request.get_json()
-        username = request.args.get('username')
-        event_name = request.args.get('event_name')
-        event_start = request.args.get('event_start')
-        site_name = request.args.get('site_name')
-        visit_date = request.args.get('visit_date')
-        query = queries.log_event_visit(username=username, event_name=event_name, event_start=event_start, site_name=site_name, visit_date=visit_date)
-
-
-
+        username = data['username']
+        event_name = data['event_name']
+        event_start = data['event_start']
+        site_name = data['site_name']
+        visit_date = data['visit_date']
+        query = queries.log_event_visit(username, event_name, event_start, site_name, visit_date)
+        try:
+            cur.execute(query)
+            return "IT'SALLGOOD"
+        except:
+            print()
     else:
         event_name = request.args.get('event_name')
         site_name = request.args.get('site_name')
@@ -622,8 +675,8 @@ def v_event_detail():
         )
 
 
-
-@app.route('/v_explore_site') #Screen 35 - DONE
+# Screen 35
+@app.route('/v_explore_site')
 def v_explore_site():
     username = request.args.get('username')
     query = queries.explore_site.format(username=username)
@@ -645,14 +698,22 @@ def v_explore_site():
         siteList
     )
 
-
+# Screen 36
 @app.route('/v_transit_detail', methods=['GET', 'POST']) #Screen 36- GET DONE, POST NOT DONE
 def v_transit_tranit():
     if request.method == 'POST':
         data = request.get_json()
-
-
-
+        username = data['username']
+        t_type = data['type']
+        route = data['route']
+        transit_date = data['transit_date']
+        query = queries.log_transit.format(username, t_type, route, transit_date)
+        print(query)
+        try:
+            cur.execute(query)
+            return "ITSALLGOOD"
+        except:
+            print()
     else:
         type = request.args.get('type')
         route = request.args.get('route')
@@ -672,18 +733,24 @@ def v_transit_tranit():
             transitList.append(transit)
 
         return json.dumps(
-
             transitList
         )
 
-
-
-
-@app.route('/v_site_detail', methods=['GET', 'POST']) #Screen 37 - GET DONE, POST NOT DONE
+# Screen 37
+@app.route('/v_site_detail', methods=['GET', 'POST'])
 def v_site_detail():
     if request.method == 'POST':
         data = request.get_json()
-
+        date = data['date']
+        username = data['username']
+        site_name = data['site_name']
+        query = log_queries.log_site.format(username, site_name, date)
+        print(query)
+        try:
+            cur.execute(query)
+            return log_queries.updated
+        except:
+            print()
     else:
         site_name = request.args.get('site_name')
         query = queries.get_site_detail.format(site_name=site_name)
@@ -703,8 +770,8 @@ def v_site_detail():
             siteList
         )
 
-
-@app.route('/v_visit_history') #Screen 38 - DONE?
+# Screen 38
+@app.route('/v_visit_history')
 def v_visit_history():
     username = request.args.get('username')
     query = queries.visit_history.format(username)

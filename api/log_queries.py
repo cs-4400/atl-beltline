@@ -24,3 +24,11 @@ call display_edit_site(\'{}\')
 get_manager = """
 call get_managers()
 """
+
+log_site = """
+call log_site_visit(\'{}\', \'{}\', \'{}\')
+"""
+
+log_event = """
+call log_event_visit(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\')
+"""
