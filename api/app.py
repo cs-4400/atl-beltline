@@ -78,6 +78,7 @@ def register_user():
         print('this shit exists')
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -97,6 +98,7 @@ def register_visitor():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -126,6 +128,7 @@ def register_employee():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -155,6 +158,7 @@ def register_employee_visitor():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -169,6 +173,7 @@ def takes_transit():
         query = log_queries.take_transit.format(username, _type, route, transit_date)
         try:
             cur.execute(query)
+            conn.commit()
             return queries.register_successfully
         except mysql.err.IntegrityError:
             return log_queries.already_logged
@@ -239,16 +244,18 @@ def e_manage_profile():
         profile
     )
 
-@app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
+@app.route('/a_manage_user', methods=['GET', 'PUT']) #Screen 18
 def a_manage_user():
-    if request.method == 'POST':
+    if request.method == 'PUT':
         data = request.get_json()
         username = data['username']
         status = data['status']
-        query = queries.approve.format(username, status)
+        # query = queries.approve.format(status, username)
+        query = queries.change_user_status.format(username, status)
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "UPDATE_SUCCESS"
         except:
             return "BIGFATERRO"
@@ -306,6 +313,7 @@ def a_edit_site():
         old_name = data['old_name']
         query = log_queries.update_site.format(new_name, new_zip, new_address, new_manager, new_open, old_name)
         cur.execute(query)
+        conn.commit()
         return log_queries.updated
     else:
         site_name = request.args.get('site_name')
@@ -340,6 +348,7 @@ def a_create_site():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             return "ITS BROKEN"
@@ -361,26 +370,34 @@ def a_create_site():
         )
 
 # Screen 22
-@app.route('/manage_transit')
+@app.route('/manage_transit', methods=['GET', 'DELETE'])
 def a_manage_transit():
-    query = queries.manage_transit
-    cur.execute(query)
-    data = cur.fetchall()
+    if request.method == 'DELETE':
+        type = request.args.get('type')
+        route = request.args.get('route')
+        query = queries.delete_transit.format(type=type, route=route)
+        cur.execute(query)
+        print("DELETED TRANSIT")
+        return "ITSALLDELETED"
+    else:
+        query = queries.manage_transit
+        cur.execute(query)
+        data = cur.fetchall()
 
-    transitList = []
+        transitList = []
 
-    for transits in data:
-        transit = {}
-        transit['type'] = transits[0]
-        transit['route'] = transits[1]
-        transit['price'] = str(transits[2])
-        transit['num_sites'] = str(transits[3])
-        transit['num_log'] = str(transits[4])
-        transitList.append(transit)
+        for transits in data:
+            transit = {}
+            transit['type'] = transits[0]
+            transit['route'] = transits[1]
+            transit['price'] = str(transits[2])
+            transit['num_sites'] = str(transits[3])
+            transit['num_log'] = str(transits[4])
+            transitList.append(transit)
 
-    return json.dumps(
-        transitList
-    )
+        return json.dumps(
+            transitList
+        )
 
 # Screen 23 : POST DONE, GET NOT DONE
 @app.route('/a_edit_transit', methods=['GET', 'POST'])
@@ -397,6 +414,7 @@ def a_edit_transit():
                                               new_route, new_price, sites)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print("ITAINTGOOD, YOUGOTERROR")
@@ -451,6 +469,7 @@ def m_edit_event():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print("BIGFATERROR")
@@ -458,41 +477,32 @@ def m_edit_event():
     else:
         event_name = request.args.get('event_name')
         event_date = request.args.get('event_date')
-        query1 = queries.m_edit_event.format(event_name, event_date)
-        query2 = queries.event_staffs.format(event_name, event_date)
+        site_name = request.args.get('site_name')
+        query1 = queries.m_edit_event.format(event_name, event_date, site_name)
+
         cur.execute(query1)
         data1 = cur.fetchall()
         print(data1)
 
-
         event_report = []
-        # event_price = 0
 
         event_detail = []
+
         for details in data1:
             detail = {}
             detail['event_name'] = details[0]
             detail['event_price'] = str(details[1])
-            # event_price = details[1]
             detail['event_start'] = str(details[2])
             detail['end_date'] = str(details[3])
             detail['min_staff'] = str(details[4])
             detail['capacity'] = str(details[5])
-            detail['description'] = details[6]
+            detail['staff_names'] = [x.strip() for x in details[6].split(',')]
+            detail['description'] = details[7]
             event_detail.append(detail)
 
-        cur.execute(query2)
-        data2 = cur.fetchall()
-        staff_list = []
-        for staffs in data2:
-            staff = {}
-            staff['staff'] = staffs[0]
-            staff['username'] = staffs[1]
-            staff_list.append(staff)
-
         event_price = data1[0][1]
-        query3 = queries.event_report.format(event_name, event_date, event_price)
-        cur.execute(query3)
+        query2 = queries.event_report.format(event_name, event_date, event_price)
+        cur.execute(query2)
         data3 = cur.fetchall()
         revenue = []
         for days in data3:
@@ -503,7 +513,6 @@ def m_edit_event():
             revenue.append(day)
 
         event_report.append(event_detail)
-        event_report.append(staff_list)
         event_report.append(revenue)
 
         return json.dumps(
@@ -529,6 +538,7 @@ def m_create_event():
                                      end_date, min_staff, site_name,
                                      price, capacity, description, staffs)
         cur.execute(query)
+        conn.commit()
         return "ITSALLGOOD"
 
     else:
@@ -713,6 +723,7 @@ def v_event_detail():
         query = queries.log_event_visit(username, event_name, event_start, site_name, visit_date)
         try:
             cur.execute(query)
+            conn.commit()
             return "IT'SALLGOOD"
         except:
             print()
@@ -776,6 +787,7 @@ def v_transit_tranit():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print()
@@ -813,6 +825,7 @@ def v_site_detail():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return log_queries.updated
         except:
             print()
