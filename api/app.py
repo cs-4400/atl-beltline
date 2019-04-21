@@ -377,6 +377,7 @@ def a_manage_transit():
         route = request.args.get('route')
         query = queries.delete_transit.format(type=type, route=route)
         cur.execute(query)
+        conn.commit()
         print("DELETED TRANSIT")
         return "ITSALLDELETED"
     else:
