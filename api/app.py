@@ -184,13 +184,66 @@ def s_event_detail():
 def v_explore_event():
     pass
 
-@app.route('/v_event_detail') #Screen 34
+@app.route('/v_event_detail', methods=['GET', 'POST']) #Screen 34
 def v_event_detail():
-    pass
+    if request.method == 'POST':
+        data = request.get_json()
+        username = request.args.get('username')
+        event_name = request.args.get('event_name')
+        event_start = request.args.get('event_start')
+        site_name = request.args.get('site_name')
+        visit_date = request.args.get('visit_date')
+        query = queries.log_event_visit(username=username, event_name=event_name, event_start=event_start, site_name=site_name, visit_date=visit_date)
 
-@app.route('/v_explore_site') #Screen 35
+
+
+    else:
+        event_name = request.args.get('event_name')
+        site_name = request.args.get('site_name')
+        start_date = request.args.get('start_date')
+
+        query = queries.get_event_detail.format(event_name, site_name, start_date)
+        print(query)
+        cur.execute(query)
+        data = cur.fetchall()
+        print(data)
+        eventDetail = []
+
+        for events in data:
+            event = {}
+            event['event_name'] = events[0]
+            event['site_name'] = events[1]
+            event['start_date'] = str(events[2])
+            eventDetail.append(event)
+
+        return json.dumps(
+            eventDetail
+        )
+
+
+
+@app.route('/v_explore_site') #Screen 35 - DONE
 def v_explore_site():
-    pass
+    username = request.args.get('username')
+    query = queries.explore_site.format(username=username)
+    cur.execute(query)
+    data = cur.fetchall()
+
+    siteList = []
+
+    for site in data:
+        sit = {}
+        sit['site_name'] = site[0]
+        sit['event_count'] = str(site[1])
+        sit['total_visits'] = str(site[2])
+        sit['my_visits'] = str(site[3])
+        siteList.append(sit)
+
+
+    return json.dumps(
+        siteList
+    )
+
 
 @app.route('/v_transit_detail') #Screen 36
 def v_transit_tranit():
@@ -201,7 +254,6 @@ def v_site_detail():
     username = request.args.get('username')
     site_name = request.args.get('site_name')
     visit_date = request.args.get('visit_date')
-    # query =
     pass
 
 

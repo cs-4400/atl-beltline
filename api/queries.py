@@ -195,7 +195,7 @@ call explore_event(\"{username}\")
 # =================================================================
 # Screen 34
 get_event_detail = """
-call get_event_detail(\"{name}\", \"{site_name}\", \"{start_date}\")
+call get_event_detail(\"{}\", \"{}\", \"{}\")
 """
 # get_event_detail(IN p_name varchar(50), IN p_site_name varchar(50), IN p_start_date date)
 
