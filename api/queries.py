@@ -16,6 +16,11 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 validate_user = """
 call login_user(\"{}\")"""
 
+get_user_info = """
+call get_user_info(\'{}\')
+"""
+
+
 get_users = """
 SELECT 
     email, password, uname1, user_type,
