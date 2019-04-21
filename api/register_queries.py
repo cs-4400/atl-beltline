@@ -10,5 +10,9 @@ select * from user_email where email=\'()\'
 """
 
 register_visitor = """
-CALL register_helper_1(p_username, p_fname, p_lname, p_pw, “Visitor”, p_emails);
+call register_visitor(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\')
 """
+
+register_employee = """call register_employee( \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\', \'{}\',  \'{}\', \'{}\', \'{}\')"""
+
+register_employee_visitor = """call register_employee_visitor( \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\',  \'{}\', \'{}\',  \'{}\', \'{}\', \'{}\')"""

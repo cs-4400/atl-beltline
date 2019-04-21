@@ -7,7 +7,8 @@ from api import queries
 from api import register_queries
 from flask_cors import CORS
 from flask_api import status
-
+from api import log_queries
+from api import site_queries
 app = Flask(__name__)
 CORS(app)
 
@@ -58,46 +59,121 @@ def find_email():
         return queries.email_already_exists
     return "200"
 
-# ===========================================================================================================================
 
-# @app.route('/register_user', methods=['POST']) #Screen 3
-# def register_user():
-#     data = request.get_json()
-#     username = data['username']
-#     email = data['email']
-#     fname = data['fname']
-#     lname = data['lname']
-#     pw = data['pw']
-#     query = register_queries.register_user.format(username, email, fname, lname, pw)
-#     check_exist = register_queries.check_exist.format(username)
-#     cur.execute(check_exist)
-#     exist = cur.fetchall()
-#     if len(exist) > 0:
-#         return queries.username_taken
-#     cur.execute(query)
-#     return queries.register_successfully
+@app.route('/register_user', methods=['POST']) #Screen 3
+def register_user():
+    data = request.get_json()
+    username = data['username']
+    email = data['email']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    query = register_queries.register_user.format(username, fname, lname, pw, email)
+    print(query)
+    check_exist = register_queries.check_exist.format(username)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        print('this shit exists')
+        return queries.username_taken
+    cur.execute(query)
+    return queries.register_successfully
 
 
-
-@app.route('/register_vistor') #Screen 4
+@app.route('/register_visitor', methods=['POST']) #Screen 4
 def register_visitor():
     data = request.get_json()
-    # query = register_queries.
-    pass
+    username = data['username']
+    email = data['email']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    query = register_queries.register_visitor.format(username, fname, lname, pw, email)
+    check_exist = register_queries.check_exist.format(username)
+    print(query)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        return queries.username_taken
+    cur.execute(query)
+    return queries.register_successfully
 
-@app.route('/register_employee') #Screen 5
+
+@app.route('/register_employee', methods=['POST']) #Screen 5
 def register_employee():
-    pass
+    data = request.get_json()
+    print(data)
+    username = data['username']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    phone = data['phone']
+    address = data['address']
+    city = data['city']
+    state = data['state']
+    zip = data['zip']
+    emp_type = data['emp_type']
+    emp_id = data['empID']
+    emails = data['emails']
+    query = register_queries.register_employee.format(username, fname, lname, pw, phone,
+                                                      address, city, state, zip,
+                                                      emp_type, emp_id, emails)
+    check_exist = register_queries.check_exist.format(username)
+    print(query)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        return queries.username_taken
+    cur.execute(query)
+    return queries.register_successfully
 
-@app.route('/register_employee-visitor') #Screen 6
+
+@app.route('/register_emp_visitor', methods=['POST']) #Screen 6
 def register_employee_visitor():
-    pass
+    data = request.get_json()
+    print(data)
+    username = data['username']
+    fname = data['fname']
+    lname = data['lname']
+    pw = data['pw']
+    phone = data['phone']
+    address = data['address']
+    city = data['city']
+    state = data['state']
+    zip = data['zip']
+    emp_type = data['emp_type']
+    emp_id = data['empID']
+    emails = data['emails']
+    query = register_queries.register_employee_visitor.format(username, fname, lname, pw, phone,
+                                                              address, city, state, zip,
+                                                              emp_type, emp_id, emails)
+    check_exist = register_queries.check_exist.format(username)
+    print(query)
+    cur.execute(check_exist)
+    exist = cur.fetchall()
+    if len(exist) > 0:
+        return queries.username_taken
+    cur.execute(query)
+    return queries.register_successfully
 
-# ===========================================================================================================================
 
-@app.route('/takes_transit') #Screen 15
+@app.route('/takes_transit', methods=['GET', 'POST']) #Screen 15
 def takes_transit():
-    pass
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data['username']
+        _type = data['type']
+        route = data['route']
+        transit_date = data['log_date']
+        query = log_queries.take_transit.format(username, _type, route, transit_date)
+        try:
+            cur.execute(query)
+            return queries.register_successfully
+        except mysql.err.IntegrityError:
+            return log_queries.already_logged
+    else:
+        return ''
+
 
 
 @app.route('/transit_history') #Screen 16
@@ -132,17 +208,59 @@ def a_manage_user():
 def a_manage_site():
     pass
 
-@app.route('/a_edit_site') #Screen 20
+@app.route('/edit_site', methods=['GET', 'POST']) #Screen 20
 def a_edit_site():
-    pass
+    if request.method == 'POST':
+        data = request.get_json()
+        new_name = data['new_name']
+        new_zip = data['new_zip']
+        new_address = data['new_address']
+        new_manager = data['new_manager']
+        new_open = data['new_open']
+        old_name = data['old_name']
+        query = log_queries.update_site.format(new_name, new_zip, new_address, new_manager, new_open, old_name)
+        cur.execute(query)
+        return log_queries.updated
+    else:
+        site_name = request.args.get('site_name')
+        cur.execute(log_queries.get_manager)
+        managers = cur.fetchall()
+        query = log_queries.display_site.format(site_name)
+        print(query)
+        cur.execute(query)
+        data = cur.fetchall()
+        return json.dumps([
+            {
+                'manager': data[0][0],
+                'manager_username': data[0][1],
+                'address': data[0][2],
+                'zipcode': data[0][3],
+                'open': data[0][4]
+            },
+            managers
+        ])
 
-@app.route('/a_create_site') #Screen 21
+
+@app.route('/create_site', methods=['POST']) #Screen 21
 def a_create_site():
-    pass
+    data = request.get_json()
+    name = data['name']
+    address = data['address']
+    zip = data['zip']
+    manager = data['manager']
+    open = data['open']
+    query = site_queries.create_site.format(name, address, zip, manager, open)
+    print(query)
+    try:
+        cur.execute(query)
+    except:
+        print()
 
-@app.route('/a_manage_transit') #Screen 22
+
+@app.route('/manage_transit') #Screen 22
 def a_manage_transit():
-    pass
+
+
 
 @app.route('/a_edit_transit') #Screen 23
 def a_edit_transit():
