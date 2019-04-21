@@ -58,8 +58,9 @@ def find_email():
         return queries.email_already_exists
     return "200"
 
+# ===========================================================================================================================
 
-# @app.route('/register_user', methods=['POST'])
+# @app.route('/register_user', methods=['POST']) #Screen 3
 # def register_user():
 #     data = request.get_json()
 #     username = data['username']
@@ -78,12 +79,28 @@ def find_email():
 
 
 
-@app.route('/register_vistor')
+@app.route('/register_vistor') #Screen 4
 def register_visitor():
     data = request.get_json()
+    # query = register_queries.
+    pass
+
+@app.route('/register_employee') #Screen 5
+def register_employee():
+    pass
+
+@app.route('/register_employee-visitor') #Screen 6
+def register_employee_visitor():
+    pass
+
+# ===========================================================================================================================
+
+@app.route('/takes_transit') #Screen 15
+def takes_transit():
+    pass
 
 
-@app.route('/transit_history')
+@app.route('/transit_history') #Screen 16
 def transit_history():
     username = request.args.get('username')
     query = queries.get_transit_history.format(username=username)
@@ -103,14 +120,92 @@ def transit_history():
         transitList
     )
 
-
-@app.route('/e_manage_profile')
+@app.route('/e_manage_profile') #Screen 17
 def e_manage_profile():
     pass
 
+@app.route('/a_manage_user') #Screen 18
+def a_manage_user():
+    pass
+
+@app.route('/a_manage_site') #Screen 19
+def a_manage_site():
+    pass
+
+@app.route('/a_edit_site') #Screen 20
+def a_edit_site():
+    pass
+
+@app.route('/a_create_site') #Screen 21
+def a_create_site():
+    pass
+
+@app.route('/a_manage_transit') #Screen 22
+def a_manage_transit():
+    pass
+
+@app.route('/a_edit_transit') #Screen 23
+def a_edit_transit():
+    pass
+
+@app.route('/a_create_transit') #Screen 24
+def a_create_transit():
+    pass
+
+@app.route('/m_manage_event') #Screen 25
+def m_manage_event():
+    pass
+
+@app.route('/m_edit_event') #Screen 26
+def m_edit_event():
+    pass
+
+@app.route('/m_create_event') #Screen 27
+def m_create_event():
+    pass
+
+@app.route('/m_manage_staff') #Screen 28
+def m_manage_staff():
+    pass
+
+@app.route('/m_daily_detail') #Screen 30
+def m_daily_detail():
+    pass
+
+@app.route('/s_view_schedule') #Screen 31
+def s_view_schedule():
+    pass
+
+@app.route('/s_event_detail') #Screen 32
+def s_event_detail():
+    pass
+
+@app.route('/v_explore_event') #Screen 33
+def v_explore_event():
+    pass
+
+@app.route('/v_event_detail') #Screen 34
+def v_event_detail():
+    pass
+
+@app.route('/v_explore_site') #Screen 35
+def v_explore_site():
+    pass
+
+@app.route('/v_transit_detail') #Screen 36
+def v_transit_tranit():
+    pass
+
+@app.route('/v_site_detail') #Screen 37
+def v_site_detail():
+    username = request.args.get('username')
+    site_name = request.args.get('site_name')
+    visit_date = request.args.get('visit_date')
+    # query =
+    pass
 
 
-@app.route('/v_visit_history')
+@app.route('/v_visit_history') #Screen 38
 def v_visit_history():
     username = request.args.get('username')
     query = queries.visit_history.format(username)
