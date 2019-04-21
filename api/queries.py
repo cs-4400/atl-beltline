@@ -14,7 +14,7 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 # =================================================================
 # Screen 1
 validate_user = """
-call login_user(\"{email}\")"""
+call login_user(\"{}\")"""
 
 get_users = """
 SELECT 
@@ -58,7 +58,11 @@ call manage_profile(\"{username}\")
 # =================================================================
 # Screen 18
 manage_user = """
-call manage_user(\"{}\")
+call manage_user()
+"""
+
+approve = """
+UPDATE user set status=\'{}\' where username = \'{}\'
 """
 # manage_user(IN p_username varchar(50))
 # =================================================================

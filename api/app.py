@@ -24,10 +24,11 @@ cur = conn.cursor()
 def validate_login():
     email = request.args.get('email')
     pw = request.args.get('password')
-    query = queries.validate_user.format(email=email)
+    query = queries.validate_user.format(email)
+    print(query)
     cur.execute(query)
     data = cur.fetchall()
-    username = data[0][2]
+    print(data)
     if len(data) < 1:
         return json.dumps({
             'message': queries.email_not_exists,
@@ -238,26 +239,38 @@ def e_manage_profile():
         profile
     )
 
-@app.route('/a_manage_user') #Screen 18
+@app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
-    username = request.args.get('username')
-    query = queries.manage_user.format(username)
-    cur.execute(query)
-    data = cur.fetchall()
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data['username']
+        status = data['status']
+        query = queries.approve.format(username, status)
+        print(query)
+        try:
+            cur.execute(query)
+            return "UPDATE_SUCCESS"
+        except:
+            return "BIGFATERRO"
 
-    details = []
+    else:
+        query = queries.manage_user
+        cur.execute(query)
+        data = cur.fetchall()
 
-    for infos in data:
-        info = {}
-        info['username'] = infos[0]
-        info['email_count'] = str(infos[1])
-        info['user_type'] = infos[2]
-        info['status'] = infos[3]
-        details.append(info)
+        details = []
 
-    return json.dumps(
-        details
-    )
+        for infos in data:
+            info = {}
+            info['username'] = infos[0]
+            info['email_count'] = str(infos[1])
+            info['user_type'] = infos[2]
+            info['status'] = infos[3]
+            details.append(info)
+
+        return json.dumps(
+            details
+        )
 
 
 @app.route('/a_manage_site') #Screen 19
