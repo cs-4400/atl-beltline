@@ -251,15 +251,14 @@ def e_manage_profile():
         profile
     )
 
-@app.route('/a_manage_user', methods=['GET', 'PUT']) #Screen 18
+@app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
-    if request.method == 'PUT':
+    if request.method == 'POST':
         data = request.get_json()
         username = data['username']
         status = data['status']
         # query = queries.approve.format(status, username)
         query = queries.change_user_status.format(username, status)
-        query = queries.approve.format(status, username)
         print(query)
         try:
             cur.execute(query)
