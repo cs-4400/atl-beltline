@@ -440,6 +440,7 @@ def a_create_transit():
     query = queries.create_transit.format(type, route, price, connected_sites)
     try:
         cur.execute(query)
+        conn.commit()
         return "ITSALLGOOD"
     except:
         return "YOUHAVEFAILEDME"
@@ -663,7 +664,7 @@ def s_view_schedule():
     )
 
 
-# Screen 32 -----------FRANK MARKED NOT DONE
+# Screen 32
 @app.route('/s_event_detail')
 def s_event_detail():
     event_name = request.args.get('event_name')
@@ -783,7 +784,7 @@ def v_explore_site():
     )
 
 # Screen 36
-@app.route('/v_transit_detail', methods=['GET', 'POST']) #Screen 36- GET DONE, POST NOT DONE
+@app.route('/v_transit_detail', methods=['GET', 'POST']) #Screen 36
 def v_transit_tranit():
     if request.method == 'POST':
         data = request.get_json()
