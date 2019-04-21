@@ -48,29 +48,33 @@ def validate_login():
     })
 
 
-@app.route('/register_user', methods=['POST'])
-def register_user():
-    data = request.get_json()
-    username = data['username']
-    email = data['email']
-    fname = data['fname']
-    lname = data['lname']
-    pw = data['pw']
-    user_type = data['user_type']
-    query = register_queries.register_user.format(
-            username,
-            email,
-            fname,
-            lname,
-            pw,
-            user_type)
-    check_exist = register_queries.check_exist.format(email)
-    cur.execute(check_exist)
+@app.route('/find_email')
+def find_email():
+    email = request.args.get('email')
+    query = register_queries.find_email.format(email)
+    cur.execute(query)
     exist = cur.fetchall()
     if len(exist) > 0:
-        return queries.email_already_exists + " or " + queries.username_taken
-    cur.execute(query)
-    return queries.register_successfully
+        return queries.email_already_exists
+    return "200"
+
+
+# @app.route('/register_user', methods=['POST'])
+# def register_user():
+#     data = request.get_json()
+#     username = data['username']
+#     email = data['email']
+#     fname = data['fname']
+#     lname = data['lname']
+#     pw = data['pw']
+#     query = register_queries.register_user.format(username, email, fname, lname, pw)
+#     check_exist = register_queries.check_exist.format(username)
+#     cur.execute(check_exist)
+#     exist = cur.fetchall()
+#     if len(exist) > 0:
+#         return queries.username_taken
+#     cur.execute(query)
+#     return queries.register_successfully
 
 
 
@@ -84,13 +88,6 @@ def transit_history():
     query = queries.transit_history.format(username=username)
     cur.execute(query)
     data = cur.fetchall()
-
-
-    # if len(data) < 1:
-    #     return json.dumps({
-    #         'message': queries.email_not_exists,
-    #     })
-
     transitList = []
 
     for transit in data:
@@ -109,6 +106,26 @@ def transit_history():
 @app.route('/e_manage_profile')
 def e_manage_profile():
     pass
+
+
+
+@app.route('/v_visit_history')
+def v_visit_history():
+    username = request.args.get('username')
+    query = queries.visit_history.format(username)
+    cur.execute(query)
+    data = cur.fetchall()
+    history = []
+    for row in data:
+        visit = {}
+        visit['date'] = str(row[0])
+        visit['event'] = row[1]
+        visit['site'] = row[2]
+        visit['price'] = row[3]
+        history.append(visit)
+
+    return json.dumps(history)
+
 
 
 @app.route('/')
