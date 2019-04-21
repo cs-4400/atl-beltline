@@ -39,6 +39,12 @@ call transit_history(\"{username}\")
 e_manage_user = """
 """
 
+# Screen 38
+visit_history = """
+call filter_visitor_visits(\"{}\")
+"""
+
+
 # =================================================================
 #Screen 29
-get_site_report
+# get_site_report
