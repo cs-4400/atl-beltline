@@ -31,16 +31,14 @@ FROM
 
 # =================================================================
 # Screen 16
-transit_history = """
-call transit_history(\"{username}\")
-"""
-# insert
-
-get_transit = """
+get_transit_history = """
 call transit_history(\"{username}\")
 """
 # =================================================================
 # Screen 17
 e_manage_user = """
-
 """
+
+# =================================================================
+#Screen 29
+get_site_report

@@ -19,7 +19,7 @@ cur = conn.cursor()
 
 # EACH SCREEN SHOULD HAVE ITS OWN ROUTE
 #
-@app.route('/validate_login')
+@app.route('/validate_login') #Screen 1
 def validate_login():
     email = request.args.get('email')
     pw = request.args.get('password')
@@ -74,22 +74,17 @@ def register_user():
 
 
 
-# @app.route('/register_vistor')
-# def register_visitor():
-#     pass
+@app.route('/register_vistor')
+def register_visitor():
+    data = request.get_json()
+
 
 @app.route('/transit_history')
 def transit_history():
     username = request.args.get('username')
-    query = queries.transit_history.format(username=username)
+    query = queries.get_transit_history.format(username=username)
     cur.execute(query)
     data = cur.fetchall()
-
-
-    # if len(data) < 1:
-    #     return json.dumps({
-    #         'message': queries.email_not_exists,
-    #     })
 
     transitList = []
 
@@ -109,6 +104,14 @@ def transit_history():
 @app.route('/e_manage_profile')
 def e_manage_profile():
     pass
+
+
+@app.route('/m_site_report')
+def m_site_report():
+
+    pass
+
+
 
 
 @app.route('/')
