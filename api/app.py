@@ -27,7 +27,6 @@ def validate_login():
     query = queries.validate_user.format(email=email)
     cur.execute(query)
     data = cur.fetchall()
-    username = data[0][2]
     if len(data) < 1:
         return json.dumps({
             'message': queries.email_not_exists,
@@ -443,7 +442,59 @@ def m_edit_event():
             print("BIGFATERROR")
 
     else:
-        print('FINISH ME')
+        event_name = request.args.get('event_name')
+        event_date = request.args.get('event_date')
+        query1 = queries.m_edit_event.format(event_name, event_date)
+        query2 = queries.event_staffs.format(event_name, event_date)
+        cur.execute(query1)
+        data1 = cur.fetchall()
+        print(data1)
+
+
+        event_report = []
+        # event_price = 0
+
+        event_detail = []
+        for details in data1:
+            detail = {}
+            detail['event_name'] = details[0]
+            detail['event_price'] = str(details[1])
+            # event_price = details[1]
+            detail['event_start'] = str(details[2])
+            detail['end_date'] = str(details[3])
+            detail['min_staff'] = str(details[4])
+            detail['capacity'] = str(details[5])
+            detail['description'] = details[6]
+            event_detail.append(detail)
+
+        cur.execute(query2)
+        data2 = cur.fetchall()
+        staff_list = []
+        for staffs in data2:
+            staff = {}
+            staff['staff'] = staffs[0]
+            staff['username'] = staffs[1]
+            staff_list.append(staff)
+
+        event_price = data1[0][1]
+        query3 = queries.event_report.format(event_name, event_date, event_price)
+        cur.execute(query3)
+        data3 = cur.fetchall()
+        revenue = []
+        for days in data3:
+            day = {}
+            day['visit_date'] = str(days[0])
+            day['visits'] = str(days[1])
+            day['price'] = str(days[2])
+            revenue.append(day)
+
+        event_report.append(event_detail)
+        event_report.append(staff_list)
+        event_report.append(revenue)
+
+        return json.dumps(
+            event_report
+        )
 
 
 # Screen 27
