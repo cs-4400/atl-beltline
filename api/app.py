@@ -49,6 +49,13 @@ def validate_login():
         'user_type': user_type
     })
 
+@app.route('/get_user_info')
+def get_user_info():
+    username = request.args.get('username')
+    query = queries.get_user_info.format(username)
+    cur.execute(query)
+    data = cur.fetchall()
+    return json.dumps(data)
 
 @app.route('/find_email')
 def find_email():
@@ -245,7 +252,7 @@ def a_manage_user():
         data = request.get_json()
         username = data['username']
         status = data['status']
-        query = queries.approve.format(username, status)
+        query = queries.approve.format(status, username)
         print(query)
         try:
             cur.execute(query)

@@ -16,6 +16,11 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 validate_user = """
 call login_user(\"{}\")"""
 
+get_user_info = """
+call get_user_info(\'{}\')
+"""
+
+
 get_users = """
 SELECT 
     email, password, uname1, user_type,
@@ -57,6 +62,7 @@ call manage_profile(\"{username}\")
 
 # =================================================================
 # Screen 18
+
 manage_user = """
 call manage_user()
 """
@@ -122,7 +128,8 @@ call manage_event()
 # =================================================================
 # Screen 26
 m_edit_event = """
-call m_edit_event(\"{name}\",\"{date}\")
+call m_edit_event(\"{name}\",\"{date}\
+")
 """
 # m_edit_event(IN e_name varchar(50), IN s_date date)
 
