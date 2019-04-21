@@ -259,7 +259,7 @@ DROP TABLE IF EXISTS `user_email`;
 CREATE TABLE `user_email` (
   `username` varchar(50) NOT NULL,
   `email` varchar(75) NOT NULL,
-  PRIMARY KEY (`email`),
+  PRIMARY KEY (`username`,`email`),
   CONSTRAINT `user_email_ibfk_1` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1561,7 +1561,7 @@ CREATE DEFINER=`cs4400user`@`%` PROCEDURE `register_employee`(
     IN p_emails VARCHAR(255))
 BEGIN
 
-    CALL register_helper_2(p_username, p_fname, p_lname, p_pw, p_phone, p_address, p_city, p_state, p_zip, p_emp_type, "Employee", p_empID, p_emails);
+    CALL register_helper_2(p_username, p_fname, p_lname, p_pw, p_phone, p_address, p_city, p_state, p_zip, p_emp_type, 'Employee', p_empID, p_emails);
 
     END ;;
 DELIMITER ;
@@ -1606,7 +1606,7 @@ CREATE DEFINER=`cs4400user`@`%` PROCEDURE `register_employee_visitor`(
     IN p_emails VARCHAR(255))
 BEGIN
 
-    CALL register_helper_2(p_username, p_fname, p_lname, p_pw, p_phone, p_address, p_city, p_state, p_zip, p_emp_type, "Employee, Visitor", p_empID, p_emails);
+    CALL register_helper_2(p_username, p_fname, p_lname, p_pw, p_phone, p_address, p_city, p_state, p_zip, p_emp_type, 'Employee, Visitor', p_empID, p_emails);
 
     END ;;
 DELIMITER ;

@@ -34,7 +34,7 @@ FROM
 # =================================================================
 # Screen 15
 get_tranits = """
-call getTransits()
+call get_transits()
 """
 log_transit = """
 call log_transit(\"{username}\", \"{type}\", \"{route}\", \"{date}\"}
@@ -50,16 +50,17 @@ call transit_history(\"{username}\")
 """
 # =================================================================
 # Screen 17
-e_manage_user = """
-"""
-
-# =================================================================
-# Screen 18
 manage_profile = """
 call manage_profile(\"{username}\")
 """
 # manage_profile(IN p_username varchar(50))
 
+# =================================================================
+# Screen 18
+manage_user = """
+call manage_user(\"{}\")
+"""
+# manage_user(IN p_username varchar(50))
 # =================================================================
 # Screen 19
 manage_site = """
@@ -72,7 +73,7 @@ call manage_site()
 # =================================================================
 # Screen 21
 get_unassigned_managers = """
-call unassigned_managers()
+call get_unassigned_managers()
 """
 
 create_site = """
@@ -175,14 +176,14 @@ call get_daily_detail(\"{manager_username}\",\"{site}\",\"{date}\")
 # =================================================================
 # Screen 31
 get_schedule = """
-call get_schedule(\"{staff_username}\")
+call get_schedule(\"{}\")
 """
 # get_schedule(IN p_staff_username varchar(50))
 
 # =================================================================
-# Screen 32
+# Screen 32 #WARNING IF DIDN'T WORK MAKE SURE THE RIGHT VERSION OF SQL SCRIPT IS RUN
 get_event_staff_detail = """
-call get_event_staff_detail(\"{event_name}\", \"{site_name}\", \"{start_date}\")
+call get_event_staff_detail(\"{}\", \"{}\", \"{}\")
 """
 # get_event_staff_detail(IN p_event_name varchar(50), IN p_site_name varchar(50), IN p_start_date date)
 # =================================================================
@@ -216,9 +217,9 @@ call explore_site(\"{username}\")
 # explore_site(IN p_username varchar(50))
 
 # =================================================================
-# Screen 36 -TODO
+# Screen 36
 get_transit_detail = """
-call get_transit_detail(\"{type}\",\"{route}\")
+call get_transit_detail(\"{}\",\"{}\")
 """
 # get_transit_detail(IN p_type varchar(25), IN p_route varchar(25))
 
