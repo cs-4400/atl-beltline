@@ -62,7 +62,6 @@ call manage_profile(\"{username}\")
 
 # =================================================================
 # Screen 18
-
 manage_user = """
 call manage_user()
 """
@@ -128,18 +127,17 @@ call manage_event()
 # =================================================================
 # Screen 26
 m_edit_event = """
-call m_edit_event(\"{name}\",\"{date}\
-")
+call m_edit_event(\"{}\",\"{}\")
 """
 # m_edit_event(IN e_name varchar(50), IN s_date date)
 
-event_staff = """
-call event_staffs(\"{name}\",\"{date}\")
+event_staffs = """
+call event_staffs(\"{}\",\"{}\")
 """
 # event_staffs(IN e_name varchar(50), IN s_date date)
 
 event_report = """
-call event_report(\"{name}\",\"{date}\",\"{price}\")
+call event_report(\"{}\",\"{}\",\"{}\")
 """
 # event_report(IN e_name varchar(50), IN s_date date, IN price decimal(10, 2))
 
