@@ -899,6 +899,9 @@ def v_visit_history():
     query = queries.visit_history.format(username)
     cur.execute(query)
     data = cur.fetchall()
+
+    full_history = []
+
     history = []
     for row in data:
         visit = {}
@@ -908,7 +911,23 @@ def v_visit_history():
         visit['price'] = row[3]
         history.append(visit)
 
-    return json.dumps(history)
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList.append(site)
+
+    full_history.append(history)
+    full_history.append(siteList)
+
+    return json.dumps(
+        full_history
+    )
 
 
 
