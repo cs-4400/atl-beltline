@@ -66,7 +66,7 @@ BEGIN
     WHERE email = p_email
       AND password = SHA(pw);
 
-END//
+END //
 
 
 #Screen 3: Register User Only (endpoint: ‘/register_user’)
@@ -84,11 +84,11 @@ BEGIN
         SET p_emails = "";
     END IF;
 
-    WHILE p_emails != '''' DO
+    WHILE p_emails != '' DO
     SET big_len = LENGTH(p_emails);
 
-    INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, '', '', 1));
-    SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, '', '', 1));
+    INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, ',', 1));
+    SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, ',', 1));
     SET p_emails = MID(p_emails, small_len + 2, big_len);
     END WHILE;
 
@@ -99,7 +99,7 @@ CREATE PROCEDURE register_helper_1(IN p_username VARCHAR(50),
                                    IN p_fname VARCHAR(50),
                                    IN p_lname VARCHAR(50),
                                    IN p_pw VARCHAR(50),
-                                   IN p_user_type ENUM (''Visitor'', ''User''),
+                                   IN p_user_type ENUM ("Visitor", "User"),
                                    IN p_emails VARCHAR(255))
 BEGIN
     INSERT INTO user VALUES (p_username, SHA(p_pw), p_fname, p_lname, "Pending", p_user_type);
@@ -143,8 +143,8 @@ CREATE PROCEDURE register_helper_2(IN p_username VARCHAR(50),
                                    IN p_city VARCHAR(50),
                                    IN p_state VARCHAR(3),
                                    IN p_zip INT,
-                                   IN p_emp_type ENUM (''Admin'', ''Manager'', ''Staff''),
-                                   IN p_user_type ENUM (''Employee'', ''Employee, Visitor ''),
+                                   IN p_emp_type ENUM ('Admin', 'Manager', 'Staff'),
+                                   IN p_user_type ENUM ('Employee', 'Employee, Visitor'),
                                    IN p_empID INT,
                                    IN p_emails VARCHAR(255))
 BEGIN
@@ -164,7 +164,7 @@ CREATE PROCEDURE register_employee(IN p_username VARCHAR(50),
                                    IN p_city VARCHAR(50),
                                    IN p_state VARCHAR(3),
                                    IN p_zip INT,
-                                   IN p_emp_type ENUM (''Admin'', ''Manager'', ''Staff''),
+                                   IN p_emp_type ENUM ('Admin', 'Manager', 'Staff'),
                                    IN p_empID INT,
                                    IN p_emails VARCHAR(255))
 BEGIN
@@ -185,7 +185,7 @@ CREATE PROCEDURE register_employee_visitor(IN p_username VARCHAR(50),
                                            IN p_city VARCHAR(50),
                                            IN p_state VARCHAR(3),
                                            IN p_zip INT,
-                                           IN p_emp_type ENUM (''Admin'', ''Manager'', ''Staff''),
+                                           IN p_emp_type ENUM ('Admin', 'Manager', 'Staff'),
                                            IN p_empID INT,
                                            IN p_emails VARCHAR(255))
 BEGIN
@@ -243,20 +243,10 @@ drop procedure if exists `manage_profile`//
 create procedure manage_profile(
     in p_username varchar(50))
 begin
-    select user.first_name,
-           user.last_name,
-           user.username,
-           coalesce(site.name, "")                                                                as site_name,
-           employee.emp_ID,
-           employee.phone,
-           concat(employee.address, ", ", employee.city, ", ", employee.state, " ", employee.zip) as address,
-           a.emails
-    from (user join employee using (username))
-             join (select username, group_concat(email order by email asc separator '', '') as emails
-                   from user_email
-                   group by username) a using (username)
-             left join site on employee.username = site.manager_username
-    where username = p_username;
+select user.first_name, user.last_name, user.username, coalesce(site.name, "") as site_name, employee.emp_ID, employee.phone, concat(employee.address, ", ", employee.city, ", ", employee.state, " ", employee.zip) as address, a.emails from
+(user join employee using (username))
+join (select username, group_concat(email order by email asc separator ', ') as emails from user_email group by username) a using (username)
+left join site on employee.username = site.manager_username where username = p_username;
 end //
 
 #Screen 18: Administrator Manage User(endpoint: ‘/a_manage_user’)
@@ -303,7 +293,7 @@ BEGIN
                  open_everyday
           FROM site) site_t
              JOIN
-         (SELECT CONCAT(first_name, '' '', last_name) AS name,
+         (SELECT CONCAT(first_name, ' ', last_name) AS name,
                  username                             AS uname2
           FROM user) user_t ON (site_t.uname1 = user_t.uname2);
 END//
@@ -384,15 +374,13 @@ END //
 DROP PROCEDURE IF EXISTS `display_transit` //
 CREATE PROCEDURE display_transit(IN p_type VARCHAR(25), IN p_route VARCHAR(25))
 BEGIN
-    Select type, route, price, connected_sites
-    from (SELECT transit_type, transit_route, group_concat(site_name SEPARATOR '', '') as connected_sites
-          from connects
-          where transit_type = p_type
-            and transit_route = p_route) connects_t
-             join
-         (select price, type, route from transit where type = p_type and route = p_route) transit_t
-         on (connects_t.transit_type = transit_t.type and connects_t.transit_route = transit_t.route);
-END//
+select type, route, price, connected_sites from
+(SELECT transit_type, transit_route, group_concat(site_name SEPARATOR ', ') as connected_sites from connects where transit_type = p_type and transit_route =p_route) connects_t
+join
+(select price, type, route from transit where type = p_type and route =p_route)
+transit_t
+on (connects_t.transit_type = transit_t.type and connects_t.transit_route = transit_t.route);
+END //
 
 #Task 2: update_transit
 #update_transit:
@@ -413,12 +401,12 @@ BEGIN
         SET p_connected_sites = "";
     END IF;
 
-    WHILE p_connected_sites != '''' DO
+    WHILE p_connected_sites != '' DO
     SET big_len = LENGTH(p_connected_sites);
 
     INSERT IGNORE INTO connects (site_name, transit_type, transit_route)
-    VALUES (SUBSTRING_INDEX(p_connected_sites, '', '', 1), p_type, p_route);
-    SET small_len = LENGTH(SUBSTRING_INDEX(p_connected_sites, '', '', 1));
+    VALUES (SUBSTRING_INDEX(p_connected_sites, ',', 1), p_type, p_route);
+    SET small_len = LENGTH(SUBSTRING_INDEX(p_connected_sites, ',', 1));
     SET p_connected_sites = MID(p_connected_sites, small_len + 2, big_len);
     END WHILE;
 END //
@@ -443,12 +431,12 @@ BEGIN
             SET p_connected_sites = "";
         END IF;
 
-        WHILE p_connected_sites != '''' DO
+        WHILE p_connected_sites != '' DO
         SET big_len = LENGTH(p_connected_sites);
 
         INSERT IGNORE INTO connects (site_name, transit_type, transit_route)
-        VALUES (SUBSTRING_INDEX(p_connected_sites, '', '', 1), p_type, p_route);
-        SET small_len = LENGTH(SUBSTRING_INDEX(p_connected_sites, '', '', 1));
+        VALUES (SUBSTRING_INDEX(p_connected_sites, ',', 1), p_type, p_route);
+        SET small_len = LENGTH(SUBSTRING_INDEX(p_connected_sites, ',', 1));
         SET p_connected_sites = MID(p_connected_sites, small_len + 2, big_len);
         END WHILE;
 
@@ -547,12 +535,12 @@ BEGIN
         SET staff_assigned = "";
     END IF;
 
-    WHILE staff_assigned != '''' DO
+    WHILE staff_assigned != '' DO
     SET big_len = LENGTH(staff_assigned);
 
     INSERT IGNORE INTO assign_to (staff_username, event_name, event_start, site_name)
-    VALUES (SUBSTRING_INDEX(staff_assigned, '', '', 1), e_name, s_date, v_site_name);
-    SET small_len = LENGTH(SUBSTRING_INDEX(staff_assigned, '', '', 1));
+    VALUES (SUBSTRING_INDEX(staff_assigned, ',', 1), e_name, s_date, v_site_name);
+    SET small_len = LENGTH(SUBSTRING_INDEX(staff_assigned, ',', 1));
     SET staff_assigned = MID(staff_assigned, small_len + 2, big_len);
     END WHILE;
 
@@ -600,12 +588,12 @@ BEGIN
         SET staff_assigned = "";
     END IF;
 
-    WHILE staff_assigned != '''' DO
+    WHILE staff_assigned != '' DO
     SET big_len = LENGTH(staff_assigned);
 
     INSERT IGNORE INTO assign_to (staff_username, event_name, event_start, site_name)
-    VALUES (SUBSTRING_INDEX(staff_assigned, '', '', 1), e_name, s_date, v_site_name);
-    SET small_len = LENGTH(SUBSTRING_INDEX(staff_assigned, '', '', 1));
+    VALUES (SUBSTRING_INDEX(staff_assigned, ',', 1), e_name, s_date, v_site_name);
+    SET small_len = LENGTH(SUBSTRING_INDEX(staff_assigned, ',', 1));
     SET staff_assigned = MID(staff_assigned, small_len + 2, big_len);
     END WHILE;
 
@@ -638,7 +626,7 @@ BEGIN
     DROP TABLE IF EXISTS dates;
     CREATE TABLE dates AS
     select *
-    from (select adddate('' 1970-01-01 '', t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) date from
+    from (select adddate('1970-01-01', t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) date from
     (select 0 i
      union
      select 1
@@ -759,7 +747,7 @@ BEGIN
            event.site_name                          AS       site,
            event.event_start                        AS       start_date,
            event.end_date,
-           DATEDIFF(event.end_date, event.event_start) + 1AS duration,
+           DATEDIFF(event.end_date, event.event_start) + 1 AS duration,
            (SELECT GROUP_CONCAT(CONCAT(user.first_name, " ", user.last_name) ORDER BY user.first_name ASC SEPARATOR
                                 ", ")
             FROM user,
@@ -950,20 +938,13 @@ END //
 #Task 1: Filter Visit History
 #filter_visitor_visits
 
-DROP PROCEDURE IF EXISTS `filter_visitor_visits`//
-CREATE PROCEDURE filter_visitor_visits(IN p_username varchar(50))
-BEGIN
-    SELECT visit_event.visit_date as date,
-           visit_event.event_name as event,
-           visit_event.site_name  as site,
-           event.event_price      as price
-    FROM visit_event,
-         event
-    WHERE visit_event.username = p_username
-    UNION ALL
-    SELECT visit_site.visit_date as date, NULL as event, visit_site.site_name as site, 0 as price
-    FROM visit_site
-    WHERE visit_site.username = p_username;
-END //
+drop procedure if exists `filter_visit_history` //
+create procedure filter_visit_history(
+in p_username varchar(50))
+begin
+(select visit_event.visit_date, event.event_name, event.site_name, event.event_price from (event join visit_event using (event_name, event_start, site_name)) where visit_event.username = p_username)
+union all
+(select visit_date, "" as event_name, site_name, 0 as event_price from visit_site where username = p_username);
+end //
 
 DELIMITER ;
