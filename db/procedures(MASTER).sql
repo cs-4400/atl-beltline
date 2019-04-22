@@ -2,14 +2,29 @@
 
 #SQL Statement Calls:
 
+# TODO
+#
+#
+#
+#
+
+#General usage procedures
+
 DROP PROCEDURE IF EXISTS `get_user_info`;
 DELIMITER //
 CREATE PROCEDURE get_user_info(IN p_username VARCHAR(50))
 BEGIN
 SELECT user.username, user.user_type, COALESCE(employee.emp_type, "") AS emp_type FROM (user LEFT JOIN employee USING (username)) WHERE user.username = p_username;
 END //
-DELIMITER ;
 
+
+DROP PROCEDURE IF EXISTS `get_sites` //
+CREATE PROCEDURE get_sites()
+BEGIN
+SELECT DISTINCT site_name FROM site;
+END //
+
+DELIMITER ;
 
 #Screen 1: User Login (endpoint: '/validate_login')
 	#Task 1: Login
@@ -365,14 +380,14 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `manage_transit`//
 CREATE PROCEDURE manage_transit()
 BEGIN
-Select type, route, price, num_sites, num_log from
+Select type, route, price, coalesce(num_sites, 0) as num_sites, coalesce(num_log, 0) as num_log from
 (Select type, route, price, num_sites from
 (Select * from transit) transit_t
-join
+left join
 (select transit_type, transit_route, count(*) as num_sites from connects group by transit_type, transit_route) connect_t
 on (transit_t.type = connect_t.transit_type and transit_t.route = connect_t.transit_route)) t_1
 
-join
+left join
 (select type as t_type, route as t_route, count(*) as num_log from take_transit group by type, route) t_2
 on (t_1.type = t_2.t_type and t_1.route = t_2.t_route);
 END//
@@ -452,7 +467,8 @@ BEGIN
 Declare big_len INT;
 Declare small_len INT;
 
-INSERT INTO transit VALUES (p_type, p_route, p_price);
+IF NOT EXISTS (select * from transit where type = p_type and route = p_route) then
+INSERT IGNORE INTO transit VALUES (p_type, p_route, p_price);
 
 IF p_connected_sites IS NULL THEN
 SET p_connected_sites = "";
@@ -466,6 +482,8 @@ SET small_len = LENGTH(SUBSTRING_INDEX(p_connected_sites, ',', 1));
 SET p_connected_sites = MID(p_connected_sites, small_len + 2, big_len);
 
 END WHILE;
+
+end  if;
 
 END //
 DELIMITER ;
