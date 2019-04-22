@@ -86,6 +86,7 @@ def register_user():
         print('this shit exists')
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -105,6 +106,7 @@ def register_visitor():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -134,8 +136,18 @@ def register_employee():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
+@app.route('/check_emp_id')
+def check_emp_id():
+    data = request.args.get('emp_id')
+    query = queries.check_dup_emp_id.format(data)
+    cur.execute(query)
+    vals = cur.fetchall()
+    if len(vals) > 0:
+        return "EMP_ID_EXISTS"
+    return "SAFE"
 
 @app.route('/register_emp_visitor', methods=['POST']) #Screen 6
 def register_employee_visitor():
@@ -151,7 +163,7 @@ def register_employee_visitor():
     state = data['state']
     zip = data['zip']
     emp_type = data['emp_type']
-    emp_id = data['empID']
+    emp_id = data['emp_id']
     emails = data['emails']
     query = register_queries.register_employee_visitor.format(username, fname, lname, pw, phone,
                                                               address, city, state, zip,
@@ -163,6 +175,7 @@ def register_employee_visitor():
     if len(exist) > 0:
         return queries.username_taken
     cur.execute(query)
+    conn.commit()
     return queries.register_successfully
 
 
@@ -170,13 +183,14 @@ def register_employee_visitor():
 def takes_transit():
     if request.method == 'POST':
         data = request.get_json()
-        username = data['username']
+        username = data['usernamea']
         _type = data['type']
         route = data['route']
         transit_date = data['log_date']
         query = log_queries.take_transit.format(username, _type, route, transit_date)
         try:
             cur.execute(query)
+            conn.commit()
             return queries.register_successfully
         except mysql.err.IntegrityError:
             return log_queries.already_logged
@@ -184,6 +198,8 @@ def takes_transit():
         query = queries.get_transit
         cur.execute(query)
         data = cur.fetchall()
+
+        transit_detail = []
 
         transitList = []
 
@@ -195,8 +211,24 @@ def takes_transit():
             transit['connected_sites'] = str(transits[3])
             transitList.append(transit)
 
+        query2 = queries.get_sites
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        siteList = []
+
+        for sites in data2:
+            site = {}
+            site['name'] = sites[0]
+            siteList.append(site)
+
+
+        transit_detail.append(transitList)
+        transit_detail.append(siteList)
+        print(transit_detail)
+
         return json.dumps(
-            transitList
+            transit_detail
         )
 
 @app.route('/transit_history') #Screen 16
@@ -253,10 +285,12 @@ def a_manage_user():
         data = request.get_json()
         username = data['username']
         status = data['status']
-        query = queries.approve.format(status, username)
+        # query = queries.approve.format(status, username)
+        query = queries.change_user_status.format(username, status)
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "UPDATE_SUCCESS"
         except:
             return "BIGFATERRO"
@@ -314,6 +348,7 @@ def a_edit_site():
         old_name = data['old_name']
         query = log_queries.update_site.format(new_name, new_zip, new_address, new_manager, new_open, old_name)
         cur.execute(query)
+        conn.commit()
         return log_queries.updated
     else:
         site_name = request.args.get('site_name')
@@ -348,6 +383,7 @@ def a_create_site():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             return "ITS BROKEN"
@@ -369,26 +405,36 @@ def a_create_site():
         )
 
 # Screen 22
-@app.route('/manage_transit')
+@app.route('/manage_transit', methods=['GET', 'DELETE'])
 def a_manage_transit():
-    query = queries.manage_transit
-    cur.execute(query)
-    data = cur.fetchall()
+    if request.method == 'DELETE':
+        type = request.args.get('type')
+        route = request.args.get('route')
+        query = queries.delete_transit.format(type=type, route=route)
+        cur.execute(query)
+        conn.commit()
+        print("DELETED TRANSIT")
+        return "ITSALLDELETED"
+    else:
+        query = queries.manage_transit
+        cur.execute(query)
+        # conn.commit()
+        data = cur.fetchall()
 
-    transitList = []
+        transitList = []
 
-    for transits in data:
-        transit = {}
-        transit['type'] = transits[0]
-        transit['route'] = transits[1]
-        transit['price'] = str(transits[2])
-        transit['num_sites'] = str(transits[3])
-        transit['num_log'] = str(transits[4])
-        transitList.append(transit)
+        for transits in data:
+            transit = {}
+            transit['type'] = transits[0]
+            transit['route'] = transits[1]
+            transit['price'] = str(transits[2])
+            transit['num_sites'] = str(transits[3])
+            transit['num_log'] = str(transits[4])
+            transitList.append(transit)
 
-    return json.dumps(
-        transitList
-    )
+        return json.dumps(
+            transitList
+        )
 
 # Screen 23 : POST DONE, GET NOT DONE
 @app.route('/a_edit_transit', methods=['GET', 'POST'])
@@ -405,6 +451,7 @@ def a_edit_transit():
                                               new_route, new_price, sites)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print("ITAINTGOOD, YOUGOTERROR")
@@ -422,6 +469,7 @@ def a_create_transit():
     query = queries.create_transit.format(type, route, price, connected_sites)
     try:
         cur.execute(query)
+        conn.commit()
         return "ITSALLGOOD"
     except:
         return "YOUHAVEFAILEDME"
@@ -447,7 +495,7 @@ def m_manage_event():
         eventList
     )
 
-@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26 --Come back to later...  may need multiple urls or extensions
+@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26
 def m_edit_event():
     if request.method == 'POST':
         data = request.get_json()
@@ -459,6 +507,7 @@ def m_edit_event():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print("BIGFATERROR")
@@ -466,41 +515,32 @@ def m_edit_event():
     else:
         event_name = request.args.get('event_name')
         event_date = request.args.get('event_date')
-        query1 = queries.m_edit_event.format(event_name, event_date)
-        query2 = queries.event_staffs.format(event_name, event_date)
+        site_name = request.args.get('site_name')
+        query1 = queries.m_edit_event.format(event_name, event_date, site_name)
+
         cur.execute(query1)
         data1 = cur.fetchall()
         print(data1)
 
-
         event_report = []
-        # event_price = 0
 
         event_detail = []
+
         for details in data1:
             detail = {}
             detail['event_name'] = details[0]
             detail['event_price'] = str(details[1])
-            # event_price = details[1]
             detail['event_start'] = str(details[2])
             detail['end_date'] = str(details[3])
             detail['min_staff'] = str(details[4])
             detail['capacity'] = str(details[5])
-            detail['description'] = details[6]
+            detail['staff_names'] = [x.strip() for x in details[6].split(',')]
+            detail['description'] = details[7]
             event_detail.append(detail)
 
-        cur.execute(query2)
-        data2 = cur.fetchall()
-        staff_list = []
-        for staffs in data2:
-            staff = {}
-            staff['staff'] = staffs[0]
-            staff['username'] = staffs[1]
-            staff_list.append(staff)
-
         event_price = data1[0][1]
-        query3 = queries.event_report.format(event_name, event_date, event_price)
-        cur.execute(query3)
+        query2 = queries.event_report.format(event_name, event_date, event_price)
+        cur.execute(query2)
         data3 = cur.fetchall()
         revenue = []
         for days in data3:
@@ -511,7 +551,6 @@ def m_edit_event():
             revenue.append(day)
 
         event_report.append(event_detail)
-        event_report.append(staff_list)
         event_report.append(revenue)
 
         return json.dumps(
@@ -537,6 +576,7 @@ def m_create_event():
                                      end_date, min_staff, site_name,
                                      price, capacity, description, staffs)
         cur.execute(query)
+        conn.commit()
         return "ITSALLGOOD"
 
     else:
@@ -653,7 +693,7 @@ def s_view_schedule():
     )
 
 
-# Screen 32 -----------FRANK MARKED NOT DONE
+# Screen 32
 @app.route('/s_event_detail')
 def s_event_detail():
     event_name = request.args.get('event_name')
@@ -721,6 +761,7 @@ def v_event_detail():
         query = queries.log_event_visit(username, event_name, event_start, site_name, visit_date)
         try:
             cur.execute(query)
+            conn.commit()
             return "IT'SALLGOOD"
         except:
             print()
@@ -772,7 +813,7 @@ def v_explore_site():
     )
 
 # Screen 36
-@app.route('/v_transit_detail', methods=['GET', 'POST']) #Screen 36- GET DONE, POST NOT DONE
+@app.route('/v_transit_detail', methods=['GET', 'POST']) #Screen 36
 def v_transit_tranit():
     if request.method == 'POST':
         data = request.get_json()
@@ -784,6 +825,7 @@ def v_transit_tranit():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return "ITSALLGOOD"
         except:
             print()
@@ -821,6 +863,7 @@ def v_site_detail():
         print(query)
         try:
             cur.execute(query)
+            conn.commit()
             return log_queries.updated
         except:
             print()
