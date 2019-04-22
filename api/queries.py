@@ -47,7 +47,9 @@ call log_transit(\"{}\", \"{}\", \"{}\", \"{}\")
 # log_transit(IN p_username varchar(50), IN p_type varchar(25), IN p_route varchar(25),
 #                              IN p_transit_date date)
 
-
+get_sites = """
+call get_sites()
+"""
 # =================================================================
 # Screen 16
 get_transit_history = """

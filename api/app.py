@@ -189,6 +189,8 @@ def takes_transit():
         cur.execute(query)
         data = cur.fetchall()
 
+        transit_detail = []
+
         transitList = []
 
         for transits in data:
@@ -199,8 +201,23 @@ def takes_transit():
             transit['connected_sites'] = str(transits[3])
             transitList.append(transit)
 
+        query2 = queries.get_sites
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        siteList = []
+
+        for sites in data2:
+            site = {}
+            site['name'] = sites[0]
+            siteList.append(site)
+
+
+        transit_detail.append(transitList)
+        transit_detail.append(siteList)
+
         return json.dumps(
-            transitList
+            transit_detail
         )
 
 @app.route('/transit_history') #Screen 16

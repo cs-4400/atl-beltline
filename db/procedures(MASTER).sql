@@ -21,7 +21,7 @@ END //
 DROP PROCEDURE IF EXISTS `get_sites` //
 CREATE PROCEDURE get_sites()
 BEGIN
-SELECT DISTINCT site_name FROM site;
+SELECT DISTINCT name FROM site;
 END //
 
 DELIMITER ;
