@@ -9,6 +9,7 @@ from flask_cors import CORS
 from flask_api import status
 from api import log_queries
 from api import site_queries
+import hashlib
 app = Flask(__name__)
 CORS(app)
 
@@ -25,15 +26,23 @@ def validate_login():
     email = request.args.get('email')
     pw = request.args.get('password')
     query = queries.validate_user.format(email)
-    print(query)
+    # print(query)
     cur.execute(query)
     data = cur.fetchall()
-    print(data)
+    # print(data)
     if len(data) < 1:
         return json.dumps({
             'message': queries.email_not_exists,
         })
-    if pw != data[0][1]:
+
+    query2 = queries.validate_user2.format(email, pw)
+    print(query2)
+    cur.execute(query2)
+    passw = cur.fetchall()
+    print(passw)
+    # print("Data:" + data[0][1])
+    # if pw != data[0][1]:
+    if len(passw) < 1:
         return json.dumps({
             'message': queries.wrong_pw
         })

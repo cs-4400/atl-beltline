@@ -20,6 +20,9 @@ get_user_info = """
 call get_user_info(\'{}\')
 """
 
+validate_user2 = """
+call login_user2(\'{}\', \'{}\')
+"""
 
 get_users = """
 SELECT 

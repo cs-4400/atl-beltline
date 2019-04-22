@@ -49,6 +49,25 @@ WHERE
     email = p_email;
 END//
 
+DROP PROCEDURE IF EXISTS `login_user2` //
+CREATE PROCEDURE login_user2(IN p_email VARCHAR(75), IN pw varchar(50))
+BEGIN
+SELECT
+    email, password, uname1, user_type
+FROM
+    (SELECT
+        username AS uname1, email
+    FROM
+        user_email) email_t
+        JOIN
+    (SELECT
+        username AS uname2, user_type, password
+    FROM
+        user) user_t ON (email_t.uname1 = user_t.uname2)
+WHERE
+    email = p_email AND password = SHA(pw);
+
+END//
 
 
 
@@ -91,7 +110,7 @@ IN p_pw VARCHAR(50),
 IN p_user_type ENUM('Visitor', 'User'),
 IN p_emails VARCHAR(255))
 BEGIN
-INSERT INTO user VALUES (p_username, p_pw, p_fname, p_lname, "Pending", p_user_type);
+INSERT INTO user VALUES (p_username, SHA(p_pw), p_fname, p_lname, "Pending", p_user_type);
 
 CALL enter_emails(p_username, p_emails);
 END //
@@ -149,7 +168,7 @@ IN p_user_type ENUM('Employee', 'Employee, Visitor'),
 IN p_empID INT,
 IN p_emails VARCHAR(255))
 BEGIN
-INSERT INTO user VALUES (p_username, p_pw, p_fname, p_lname, "Pending", p_user_type);
+INSERT INTO user VALUES (p_username, SHA(p_pw), p_fname, p_lname, "Pending", p_user_type);
 INSERT INTO employee VALUES (p_username, p_empID, p_phone, p_address, p_city, p_state, p_zip, p_emp_type);
 
 CALL enter_emails(p_username, p_emails);

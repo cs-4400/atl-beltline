@@ -245,12 +245,10 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('david.smith','dsmith456','David','Smith','Approved','Employee'),('james.smith','jsmith123','James','Smith','Approved','Employee'),('manager1','manager1','Manager','One','Pending','Employee'),('manager2','manager2','Manager','Two','Approved','Employee, Visitor'),('manager3','manager3','Manager','Three','Approved','Employee'),('manager4','manager4','Manager','Four','Approved','Employee, Visitor'),('manager5','manager5','Manager','Five','Approved','Employee, Visitor'),('maria.garcia','mgarcia123','Maria','Garcia','Approved','Employee, Visitor'),('maria.hernandez','mhernandez','Maria','Hernandez','Approved','User'),('maria.rodriguez','mrodriguez','Maria','Rodriguez','Declined','Visitor'),('mary.smith','msmith789','Mary','Smith','Approved','Visitor'),('michael.smith','msmith456','Michael','Smith','Approved','Employee, Visitor'),('robert.smith','rsmith789','Robert','Smith','Approved','Employee'),('staff1','staff1234','Staff','One','Approved','Employee'),('staff2','staff4567','Staff','Two','Approved','Employee, Visitor'),('staff3','staff7890','Staff','Three','Approved','Employee, Visitor'),('user1','user123456','User','One','Pending','User'),('visitor1','visitor123','Visitor','One','Approved','Visitor');
+INSERT INTO `user` VALUES ('david.smith','9634bd08c3dd0b37ce838d38f2e2ef2860a80415','David','Smith','Approved','Employee'),('james.smith','58f831106d1d1c79fa5f9f83590d206246ca85de','James','Smith','Approved','Employee'),('manager1','a5c297c15e40ac3881db51277613aea3731b673a','Manager','One','Pending','Employee'),('manager2','d2c9a46b3870e03e3c45c6a6ba0d7a574f50c698','Manager','Two','Approved','Employee, Visitor'),('manager3','db8b07fad20ccc4eac5f54ce0af56a994e2059b3','Manager','Three','Approved','Employee'),('manager4','f4518ca20f753790dd4f0b5b167e9e1ae2ed9e16','Manager','Four','Approved','Employee, Visitor'),('manager5','4411060faa23f7b02ac5a4350224935007e76624','Manager','Five','Approved','Employee, Visitor'),('maria.garcia','241c493258b3babaa0486da8dc808e4b52b02f5b','Maria','Garcia','Approved','Employee, Visitor'),('maria.hernandez','da037944e8e532c8aea41448b0940e2f5402cb57','Maria','Hernandez','Approved','User'),('maria.rodriguez','ee6da33250668af881514183d5d188cb82a2200e','Maria','Rodriguez','Declined','Visitor'),('mary.smith','f8336938496027afea57624f99d3ce40ec7ef227','Mary','Smith','Approved','Visitor'),('michael.smith','40becf4bba71fbb1d9e3d72d1b17aba1b0771be5','Michael','Smith','Approved','Employee, Visitor'),('robert.smith','f4faf36eb82a55542d87fd52fcca3fe50fa7cbad','Robert','Smith','Approved','Employee'),('staff1','e51157a25105c5db6deb0fcc52482ecb5ded2173','Staff','One','Approved','Employee'),('staff2','3ce7b8498eb54be6b4fd442937b68f53754fa406','Staff','Two','Approved','Employee, Visitor'),('staff3','1d590b27af2c68d9b80a4a7928335eacd2de800f','Staff','Three','Approved','Employee, Visitor'),('user1','99e7a456385b481f25e1451868a3a584d4200d17','User','One','Pending','User'),('visitor1','525ff2fe619f303eac0f00a23998fb4c2a163c09','Visitor','One','Approved','Visitor');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
-UPDATE User
-SET password = SHA(password);
 --
 -- Table structure for table `user_email`
 --
@@ -1189,6 +1187,39 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `login_user2` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`cs4400user`@`%` PROCEDURE `login_user2`(IN p_email VARCHAR(75), IN pw varchar(50))
+BEGIN
+SELECT
+    email, password, uname1, user_type
+FROM
+    (SELECT
+        username AS uname1, email
+    FROM
+        user_email) email_t
+        JOIN
+    (SELECT
+        username AS uname2, user_type, password
+    FROM
+        user) user_t ON (email_t.uname1 = user_t.uname2)
+WHERE
+    email = p_email AND password = SHA(pw);
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `log_event_visit` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2062,4 +2093,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-21 21:37:19
+-- Dump completed on 2019-04-22 17:13:21
