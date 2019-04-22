@@ -254,7 +254,7 @@ def transit_history():
     transit_details.append(siteList)
 
     return json.dumps(
-        transitList
+        transit_details
     )
 
 @app.route('/e_manage_profile') #Screen 17
