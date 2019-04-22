@@ -171,7 +171,7 @@ BEGIN
 INSERT INTO user VALUES (p_username, SHA(p_pw), p_fname, p_lname, "Pending", p_user_type);
 INSERT INTO employee VALUES (p_username, p_empID, p_phone, p_address, p_city, p_state, p_zip, p_emp_type);
 
-CALL enter_emails(p_emails);
+CALL enter_emails(p_username, p_emails);
 END //
 
 DROP PROCEDURE IF EXISTS `register_employee`//

@@ -75,6 +75,10 @@ approve = """
 UPDATE user set status=\'{}\' where username = \'{}\'
 """
 
+check_dup_emp_id = """
+select * from employee where emp_ID = \'{}\'
+"""
+
 change_user_status = """
 call change_user_status(\"{}\", \"{}\")
 """

@@ -62,6 +62,7 @@ def validate_login():
 def get_user_info():
     username = request.args.get('username')
     query = queries.get_user_info.format(username)
+    print(query)
     cur.execute(query)
     data = cur.fetchall()
     return json.dumps(data)
@@ -147,6 +148,15 @@ def register_employee():
     conn.commit()
     return queries.register_successfully
 
+@app.route('/check_emp_id')
+def check_emp_id():
+    data = request.args.get('emp_id')
+    query = queries.check_dup_emp_id.format(data)
+    cur.execute(query)
+    vals = cur.fetchall()
+    if len(vals) > 0:
+        return "EMP_ID_EXISTS"
+    return "SAFE"
 
 @app.route('/register_emp_visitor', methods=['POST']) #Screen 6
 def register_employee_visitor():
@@ -162,7 +172,7 @@ def register_employee_visitor():
     state = data['state']
     zip = data['zip']
     emp_type = data['emp_type']
-    emp_id = data['empID']
+    emp_id = data['emp_id']
     emails = data['emails']
     query = register_queries.register_employee_visitor.format(username, fname, lname, pw, phone,
                                                               address, city, state, zip,
@@ -182,7 +192,7 @@ def register_employee_visitor():
 def takes_transit():
     if request.method == 'POST':
         data = request.get_json()
-        username = data['username']
+        username = data['usernamea']
         _type = data['type']
         route = data['route']
         transit_date = data['log_date']
@@ -224,6 +234,7 @@ def takes_transit():
 
         transit_detail.append(transitList)
         transit_detail.append(siteList)
+        print(transit_detail)
 
         return json.dumps(
             transit_detail
