@@ -226,6 +226,9 @@ def transit_history():
     query = queries.get_transit_history.format(username=username)
     cur.execute(query)
     data = cur.fetchall()
+
+    transit_details = []
+
     transitList = []
 
     for transit in data:
@@ -235,6 +238,20 @@ def transit_history():
         tran['transport_type'] = transit[2]
         tran['price'] = transit[3]
         transitList.append(tran)
+
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList.append(site)
+
+    transit_details.append(transitList)
+    transit_details.append(siteList)
 
     return json.dumps(
         transitList
