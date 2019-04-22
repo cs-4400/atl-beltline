@@ -349,8 +349,20 @@ def a_manage_site():
         site['name'] = sites[0]
         siteList2.append(site)
 
+    query3 = queries.get_unassigned_managers
+    cur.execute(query3)
+    data3 = cur.fetchall()
+
+    managers_list = []
+
+    for managers in data3:
+        manager = {}
+        manager['manager_name'] = managers[0]
+        managers_list.append(manager)
+
     all_siteLists.append(siteList)
     all_siteLists.append(siteList2)
+    all_siteLists.append(managers_list)
 
     return json.dumps(
         all_siteLists
