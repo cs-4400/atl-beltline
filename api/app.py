@@ -38,8 +38,8 @@ def validate_login():
             'message': queries.wrong_pw
         })
 
-    username = '' + data[0][1] + ''
-    password = '' + data[0][2]
+    username = '' + data[0][2] + ''
+    password = '' + data[0][1]
     user_type = '' + data[0][3]
 
     return json.dumps({
@@ -390,6 +390,7 @@ def a_manage_transit():
     else:
         query = queries.manage_transit
         cur.execute(query)
+        # conn.commit()
         data = cur.fetchall()
 
         transitList = []
@@ -466,7 +467,7 @@ def m_manage_event():
         eventList
     )
 
-@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26 --Come back to later...  may need multiple urls or extensions
+@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26
 def m_edit_event():
     if request.method == 'POST':
         data = request.get_json()
