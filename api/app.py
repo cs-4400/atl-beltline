@@ -455,6 +455,8 @@ def a_manage_transit():
         # conn.commit()
         data = cur.fetchall()
 
+        all_data = []
+
         transitList = []
 
         for transits in data:
@@ -466,8 +468,22 @@ def a_manage_transit():
             transit['num_log'] = str(transits[4])
             transitList.append(transit)
 
+        query2 = queries.get_sites
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        siteList = []
+
+        for sites in data2:
+            site = {}
+            site['name'] = sites[0]
+            siteList.append(site)
+
+        all_data.append(transitList)
+        all_data.append(siteList)
+
         return json.dumps(
-            transitList
+            all_data
         )
 
 # Screen 23 : POST DONE, GET NOT DONE
