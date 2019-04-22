@@ -38,8 +38,8 @@ def validate_login():
             'message': queries.wrong_pw
         })
 
-    username = '' + data[0][1] + ''
-    password = '' + data[0][2]
+    username = '' + data[0][2] + ''
+    password = '' + data[0][1]
     user_type = '' + data[0][3]
 
     return json.dumps({
@@ -53,6 +53,7 @@ def validate_login():
 def get_user_info():
     username = request.args.get('username')
     query = queries.get_user_info.format(username)
+    print(query)
     cur.execute(query)
     data = cur.fetchall()
     return json.dumps(data)
