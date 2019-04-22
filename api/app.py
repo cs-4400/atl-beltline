@@ -237,6 +237,9 @@ def transit_history():
     query = queries.get_transit_history.format(username=username)
     cur.execute(query)
     data = cur.fetchall()
+
+    transit_details = []
+
     transitList = []
 
     for transit in data:
@@ -247,8 +250,22 @@ def transit_history():
         tran['price'] = transit[3]
         transitList.append(tran)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList.append(site)
+
+    transit_details.append(transitList)
+    transit_details.append(siteList)
+
     return json.dumps(
-        transitList
+        transit_details
     )
 
 @app.route('/e_manage_profile') #Screen 17
@@ -321,6 +338,8 @@ def a_manage_site():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_siteLists = []
+
     siteList = []
 
     for sites in data:
@@ -330,8 +349,34 @@ def a_manage_site():
         site['open_everyday'] = sites[2]
         siteList.append(site)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+    query3 = queries.get_unassigned_managers
+    cur.execute(query3)
+    data3 = cur.fetchall()
+
+    managers_list = []
+
+    for managers in data3:
+        manager = {}
+        manager['manager_name'] = managers[0]
+        managers_list.append(manager)
+
+    all_siteLists.append(siteList)
+    all_siteLists.append(siteList2)
+    all_siteLists.append(managers_list)
+
     return json.dumps(
-        siteList
+        all_siteLists
     )
 
 
@@ -421,6 +466,8 @@ def a_manage_transit():
         # conn.commit()
         data = cur.fetchall()
 
+        all_data = []
+
         transitList = []
 
         for transits in data:
@@ -432,8 +479,22 @@ def a_manage_transit():
             transit['num_log'] = str(transits[4])
             transitList.append(transit)
 
+        query2 = queries.get_sites
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        siteList = []
+
+        for sites in data2:
+            site = {}
+            site['name'] = sites[0]
+            siteList.append(site)
+
+        all_data.append(transitList)
+        all_data.append(siteList)
+
         return json.dumps(
-            transitList
+            all_data
         )
 
 # Screen 23 : POST DONE, GET NOT DONE
@@ -797,6 +858,8 @@ def v_explore_site():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_siteLists = []
+
     siteList = []
 
     for sites in data:
@@ -807,9 +870,22 @@ def v_explore_site():
         site['my_visits'] = str(sites[3])
         siteList.append(site)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+    all_siteLists.append(siteList)
+    all_siteLists.append(siteList2)
 
     return json.dumps(
-        siteList
+        all_siteLists
     )
 
 # Screen 36
@@ -893,6 +969,9 @@ def v_visit_history():
     query = queries.visit_history.format(username)
     cur.execute(query)
     data = cur.fetchall()
+
+    full_history = []
+
     history = []
     for row in data:
         visit = {}
@@ -902,7 +981,23 @@ def v_visit_history():
         visit['price'] = row[3]
         history.append(visit)
 
-    return json.dumps(history)
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList.append(site)
+
+    full_history.append(history)
+    full_history.append(siteList)
+
+    return json.dumps(
+        full_history
+    )
 
 
 
