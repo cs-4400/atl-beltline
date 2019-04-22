@@ -14,7 +14,12 @@ register_successfully = "REGISTER_SUCCESSFULLY"
 # =================================================================
 # Screen 1
 validate_user = """
-call login_user(\"{email}\")"""
+call login_user(\"{}\")"""
+
+get_user_info = """
+call get_user_info(\'{}\')
+"""
+
 
 get_users = """
 SELECT 
@@ -58,9 +63,17 @@ call manage_profile(\"{username}\")
 # =================================================================
 # Screen 18
 manage_user = """
-call manage_user(\"{}\")
+call manage_user()
 """
-# manage_user(IN p_username varchar(50))
+
+approve = """
+UPDATE user set status=\'{}\' where username = \'{}\'
+"""
+
+change_user_status = """
+call change_user_status(\"{}\", \"{}\")
+"""
+# change_user_status(IN p_username varchar(50), IN p_status enum ('Approved', 'Declined'))
 # =================================================================
 # Screen 19
 manage_site = """
@@ -68,8 +81,7 @@ call manage_site()
 """
 # =================================================================
 # Screen 20
-# TODO
-
+# TODO see site_queries
 # =================================================================
 # Screen 21
 get_unassigned_managers = """
@@ -87,6 +99,11 @@ call create_site(\"{site_name}\", \"{site_address}\", \"{site_zip}\", \"{manager
 manage_transit = """
 call manage_transit()
 """
+
+delete_transit = """
+call delete_transit(\"{type}\", \"{route}\")
+"""
+# delete_transit(IN p_type varchar(25), IN p_route varchar(25))
 
 # =================================================================
 # Screen 23
@@ -118,17 +135,12 @@ call manage_event()
 # =================================================================
 # Screen 26
 m_edit_event = """
-call m_edit_event(\"{name}\",\"{date}\")
+call m_edit_event(\"{}\",\"{}\", \"{}\")
 """
-# m_edit_event(IN e_name varchar(50), IN s_date date)
-
-event_staff = """
-call event_staffs(\"{name}\",\"{date}\")
-"""
-# event_staffs(IN e_name varchar(50), IN s_date date)
+# m_edit_event(IN p_event_name varchar(50), IN p_event_start date, IN p_site_name varchar(50))
 
 event_report = """
-call event_report(\"{name}\",\"{date}\",\"{price}\")
+call event_report(\"{}\",\"{}\",\"{}\")
 """
 # event_report(IN e_name varchar(50), IN s_date date, IN price decimal(10, 2))
 
