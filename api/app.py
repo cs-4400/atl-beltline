@@ -183,11 +183,13 @@ def register_employee_visitor():
 def takes_transit():
     if request.method == 'POST':
         data = request.get_json()
-        username = data['usernamea']
+        print(data)
+        username = data['username']
         _type = data['type']
         route = data['route']
         transit_date = data['log_date']
         query = log_queries.take_transit.format(username, _type, route, transit_date)
+        print(query)
         try:
             cur.execute(query)
             conn.commit()
@@ -221,12 +223,8 @@ def takes_transit():
             site = {}
             site['name'] = sites[0]
             siteList.append(site)
-
-
         transit_detail.append(transitList)
         transit_detail.append(siteList)
-        print(transit_detail)
-
         return json.dumps(
             transit_detail
         )
@@ -267,16 +265,39 @@ def transit_history():
     return json.dumps(
         transit_details
     )
-
-@app.route('/e_manage_profile') #Screen 17
+@app.route('/e_manage_profile')
 def e_manage_profile():
     username = request.args.get('username')
-    query = queries.manage_profile.format(username=username)
+    query = queries.e_manage_profile.format(username)
     cur.execute(query)
     data = cur.fetchall()
-
     profile = []
+    for users in data:
+        user = {}
+        user['first_name'] = users[0]
+        user['last_name'] = users[1]
+        user['username'] = users[2]
+        user['email'] = users[3]
+        user['emp_ID'] = str(users[4])
+        user['phone'] = users[5]
+        user['address'] = users[6]
+        user['city'] = users[7]
+        user['state'] = users[8]
+        user['zip'] = users[9]
+        user['site_name'] = ""
+        profile.append(user)
+    return json.dumps(
+        profile
+    )
 
+
+@app.route('/m_manage_profile') #Screen 17
+def m_manage_profile():
+    username = request.args.get('username')
+    query = queries.m_manage_profile.format(username)
+    cur.execute(query)
+    data = cur.fetchall()
+    profile = []
     for users in data:
         user = {}
         user['first_name'] = users[0]
@@ -291,7 +312,6 @@ def e_manage_profile():
         user['zip'] = users[9]
         user['site_name'] = users[10]
         profile.append(user)
-
     return json.dumps(
         profile
     )
@@ -663,21 +683,38 @@ def m_create_event():
 @app.route('/m_manage_staff')
 def m_manage_staff():
     site_name = request.args.get('site_name')
-    query = queries.filter_staff.format(site_name=site_name)
-    cur.execute(query)
-    data = cur.fetchall()
+    if len(site_name) > 0:
+        query = queries.filter_staff.format(site_name=site_name)
+        cur.execute(query)
+        data = cur.fetchall()
 
-    staffList = []
+        staffList = []
 
-    for staffs in data:
-        staff = {}
-        staff['staff_name'] = staffs[0]
-        staff['event_shifts'] = str(staffs[1])
-        staffList.append(staff)
+        for staffs in data:
+            staff = {}
+            staff['staff_name'] = staffs[0]
+            staff['event_shifts'] = str(staffs[1])
+            staffList.append(staff)
 
-    return json.dumps(
-        staffList
-    )
+        return json.dumps(
+            staffList
+        )
+    else:
+        query = queries.get_all_staffs
+        cur.execute(query)
+        data = cur.fetchall()
+        print(data)
+        staffList = []
+
+        for staffs in data:
+            staff = {}
+            staff['staff_name'] = staffs[0]
+            staff['event_shifts'] = str(staffs[1])
+            staffList.append(staff)
+
+        return json.dumps(
+            staffList
+        )
 
 # Screen 29
 @app.route('/m_site_report')

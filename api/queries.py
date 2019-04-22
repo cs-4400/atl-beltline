@@ -57,11 +57,13 @@ call transit_history(\"{username}\")
 """
 # =================================================================
 # Screen 17
-manage_profile = """
-call manage_profile(\"{username}\")
+m_manage_profile = """
+call m_manage_profile(\'{}\')
 """
 # manage_profile(IN p_username varchar(50))
-
+e_manage_profile = """
+call e_manage_profile(\'{}\')
+"""
 # =================================================================
 # Screen 18
 manage_user = """
@@ -170,6 +172,14 @@ call create_event(\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\"
 # create_event(IN p_event_name varchar(50), IN p_event_start date, IN p_end_date date,
 #                               IN p_min_staff int, IN p_site_name varchar(50), IN p_price float, IN p_capacity int,
 #                               IN p_description varchar(255), IN staff_assigned varchar(255))
+
+get_all_staffs = """
+select name, shifts from
+(select count(*) as shifts, staff_username from assign_to group by staff_username) assign_to_t
+join 
+(select CONCAT(first_name, ' ', last_name) as name, username from user) user_t
+on (assign_to_t.staff_username = user_t.username)
+"""
 
 # =================================================================
 # Screen 28
