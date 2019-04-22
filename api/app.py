@@ -819,6 +819,8 @@ def v_explore_site():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_siteLists = []
+
     siteList = []
 
     for sites in data:
@@ -829,9 +831,22 @@ def v_explore_site():
         site['my_visits'] = str(sites[3])
         siteList.append(site)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+    all_siteLists.append(siteList)
+    all_siteLists.append(siteList2)
 
     return json.dumps(
-        siteList
+        all_siteLists
     )
 
 # Screen 36
