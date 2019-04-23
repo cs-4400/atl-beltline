@@ -715,6 +715,8 @@ def m_manage_staff():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_details = []
+
     staffList = []
 
     for staffs in data:
@@ -723,8 +725,22 @@ def m_manage_staff():
         staff['event_shifts'] = str(staffs[1])
         staffList.append(staff)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+    all_details.append(staffList)
+    all_details.append(siteList2)
+
     return json.dumps(
-        staffList
+        all_details
     )
 
 # Screen 29
