@@ -274,56 +274,51 @@ def transit_history():
     return json.dumps(
         transit_details
     )
-@app.route('/e_manage_profile')
-def e_manage_profile():
-    username = request.args.get('username')
-    query = queries.e_manage_profile.format(username)
-    cur.execute(query)
-    data = cur.fetchall()
-    profile = []
-    for users in data:
-        user = {}
-        user['first_name'] = users[0]
-        user['last_name'] = users[1]
-        user['username'] = users[2]
-        user['email'] = users[3]
-        user['emp_ID'] = str(users[4])
-        user['phone'] = users[5]
-        user['address'] = users[6]
-        user['city'] = users[7]
-        user['state'] = users[8]
-        user['zip'] = users[9]
-        user['site_name'] = ""
-        profile.append(user)
-    return json.dumps(
-        profile
-    )
+# @app.route('/e_manage_profile')
+# def e_manage_profile():
+#     username = request.args.get('username')
+#     query = queries.e_manage_profile.format(username)
+#     cur.execute(query)
+#     data = cur.fetchall()
+#     profile = []
+#     for users in data:
+#         user = {}
+#         user['first_name'] = users[0]
+#         user['last_name'] = users[1]
+#         user['username'] = users[2]
+#         user['email'] = users[3]
+#         user['emp_ID'] = str(users[4])
+#         user['phone'] = users[5]
+#         user['address'] = users[6]
+#         user['city'] = users[7]
+#         user['state'] = users[8]
+#         user['zip'] = users[9]
+#         user['site_name'] = ""
+#         profile.append(user)
+#     return json.dumps(
+#         profile
+#     )
 
 
-@app.route('/m_manage_profile') #Screen 17
-def m_manage_profile():
-    username = request.args.get('username')
-    query = queries.m_manage_profile.format(username)
-    cur.execute(query)
-    data = cur.fetchall()
-    profile = []
-    for users in data:
-        user = {}
-        user['first_name'] = users[0]
-        user['last_name'] = users[1]
-        user['username'] = users[2]
-        user['email'] = users[3]
-        user['emp_ID'] = str(users[4])
-        user['phone'] = users[5]
-        user['address'] = users[6]
-        user['city'] = users[7]
-        user['state'] = users[8]
-        user['zip'] = users[9]
-        user['site_name'] = users[10]
-        profile.append(user)
-    return json.dumps(
-        profile
-    )
+@app.route('/manage_profile') #Screen 17
+def manage_profile():
+    if request.method == 'POST':
+        print()
+    else:
+        username = request.args.get('username')
+        query = queries.manage_profile.format(username)
+        cur.execute(query)
+        data = cur.fetchall()
+        return json.dumps({
+            'fname': data[0][0],
+            'lname': data[0][1],
+            'username': data[0][2],
+            'site_name': data[0][3],
+            'emp_id': data[0][4],
+            'phone': data[0][5],
+            'address': data[0][6],
+            'email': data[0][7]
+        })
 
 @app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
@@ -345,6 +340,7 @@ def a_manage_user():
         query = queries.manage_user
         cur.execute(query)
         data = cur.fetchall()
+        print(data)
 
         details = []
 
@@ -432,6 +428,7 @@ def a_edit_site():
         print(query)
         cur.execute(query)
         data = cur.fetchall()
+        print(data)
         return json.dumps([
             {
                 'manager': data[0][0],
@@ -442,6 +439,19 @@ def a_edit_site():
             },
             managers
         ])
+
+
+@app.route('/delete_site', methods=['DELETE'])
+def del_site():
+    site_name = request.args.get('site_name')
+    query = queries.delete_site.format(site_name)
+    print(query)
+    try:
+        cur.execute(query)
+        conn.commit()
+        return "DELETE SUCCESSFUL"
+    except:
+        return "DELETE FAILED"
 
 
 @app.route('/a_create_site', methods=['GET', 'POST']) #Screen 21
@@ -466,12 +476,15 @@ def a_create_site():
         query = queries.get_unassigned_managers
         cur.execute(query)
         data = cur.fetchall()
-
+        print(data)
         managerList = []
 
         for managers in data:
+            print(managers)
             manager = {}
             manager['manager_name'] = managers[0]
+
+            manager['username'] = managers[1]
             managerList.append(manager)
 
         return json.dumps(
@@ -539,6 +552,7 @@ def a_edit_transit():
         sites = data['sites']
         query = queries.update_transit.format(old_type, old_route, new_type,
                                               new_route, new_price, sites)
+        print(query)
         try:
             cur.execute(query)
             conn.commit()
@@ -547,22 +561,55 @@ def a_edit_transit():
             print("ITAINTGOOD, YOUGOTERROR")
 
     else:
-        print("IM IN COMPLETE")
+        type = request.args.get('type')
+        route = request.args.get('route')
 
-@app.route('/a_create_transit', methods=['POST']) #Screen 24
-def a_create_transit():
-    data = request.get_json()
-    type = data['type']
-    route = data['route']
-    price = data['price']
-    connected_sites = data['sites']
-    query = queries.create_transit.format(type, route, price, connected_sites)
-    try:
+        query = queries.display_transit.format(type=type, route=route)
+        print(query)
         cur.execute(query)
-        conn.commit()
-        return "ITSALLGOOD"
-    except:
-        return "YOUHAVEFAILEDME"
+        data = cur.fetchall()
+
+        transit_data = []
+        print("IM IN COMPLETE")
+        for transits in data:
+            transit = {}
+            transit['type'] = transits[0]
+            transit['route'] = transits[1]
+            transit['price'] = transits[2]
+            transit['connected_sites'] = [x.strip() for x in transits[3].split(',')]
+            transit_data.append(transit)
+
+        return json.dumps(
+            transit_data
+        )
+
+
+@app.route('/a_create_transit', methods=['POST', 'GET']) #Screen 24
+def a_create_transit():
+    if request.method == 'POST':
+        data = request.get_json()
+        type = data['type']
+        route = data['route']
+        price = data['price']
+        connected_sites = data['sites']
+        query = queries.create_transit.format(type, route, price, connected_sites)
+        try:
+            cur.execute(query)
+            conn.commit()
+            return "ITSALLGOOD"
+        except:
+            return "YOUHAVEFAILEDME"
+    else:
+        query = """
+            SELECT name from site
+        """
+        cur.execute(query)
+        data = cur.fetchall()
+        sites = []
+        for site in data:
+            sites.append(site[0])
+        return json.dumps(sites)
+
 
 @app.route('/m_manage_event') #Screen 25
 def m_manage_event():
@@ -573,12 +620,14 @@ def m_manage_event():
     eventList = []
 
     for events in data:
+        print(events)
         event = {}
         event['event_name'] = events[0]
         event['staff_count'] = str(events[1])
         event['duration'] = str(events[2])
         event['total_visits'] = str(events[3])
         event['total_revenue'] = str(events[4])
+        event['start_date'] = str(events[5])
         eventList.append(event)
 
     return json.dumps(
@@ -604,10 +653,8 @@ def m_edit_event():
 
     else:
         event_name = request.args.get('event_name')
-        event_date = request.args.get('event_date')
-        site_name = request.args.get('site_name')
-        query1 = queries.m_edit_event.format(event_name, event_date, site_name)
-
+        event_date = request.args.get('event_start')
+        query1 = queries.m_edit_event.format(event_name, event_date)
         cur.execute(query1)
         data1 = cur.fetchall()
         print(data1)
@@ -625,7 +672,8 @@ def m_edit_event():
             detail['min_staff'] = str(details[4])
             detail['capacity'] = str(details[5])
             detail['staff_names'] = [x.strip() for x in details[6].split(',')]
-            detail['description'] = details[7]
+            detail['staff_usernames'] = details[7]
+            detail['description'] = details[8]
             event_detail.append(detail)
 
         event_price = data1[0][1]

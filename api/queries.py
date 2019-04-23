@@ -50,6 +50,10 @@ call log_transit(\"{}\", \"{}\", \"{}\", \"{}\")
 # log_transit(IN p_username varchar(50), IN p_type varchar(25), IN p_route varchar(25),
 #                              IN p_transit_date date)
 
+delete_site = """
+DELETE from site where name = \'{}\'
+"""
+
 get_sites = """
 call get_sites()
 """
@@ -60,13 +64,13 @@ call transit_history(\"{username}\")
 """
 # =================================================================
 # Screen 17
-m_manage_profile = """
-call m_manage_profile(\'{}\')
+manage_profile = """
+call manage_profile(\'{}\')
 """
 # manage_profile(IN p_username varchar(50))
-e_manage_profile = """
-call e_manage_profile(\'{}\')
-"""
+# e_manage_profile = """
+# call e_manage_profile(\'{}\')
+# """
 # =================================================================
 # Screen 18
 manage_user = """
@@ -146,7 +150,7 @@ call manage_event()
 # =================================================================
 # Screen 26
 m_edit_event = """
-call m_edit_event(\"{}\",\"{}\", \"{}\")
+call m_edit_event(\"{}\",\"{}\")
 """
 # m_edit_event(IN p_event_name varchar(50), IN p_event_start date, IN p_site_name varchar(50))
 
