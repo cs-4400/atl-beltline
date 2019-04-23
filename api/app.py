@@ -278,10 +278,23 @@ def transit_history():
     )
 
 
-@app.route('/manage_profile') #Screen 17
+@app.route('/manage_profile', methods=['GET', 'POST']) #Screen 17
 def manage_profile():
     if request.method == 'POST':
-        print()
+        data = request.get_json()
+        emp_id = data['emp_id']
+        fname = data['fname']
+        lname = data['lname']
+        phone = data['phone']
+        emails = data['emails']
+        query = queries.update_profile.format(emp_id, fname, lname, phone, emails)
+        print(query)
+        try:
+            cur.execute(query)
+            conn.commit()
+            return "UPDATE SUCCESS"
+        except:
+            return "CANT UPDATE"
     else:
         username = request.args.get('username')
         query = queries.manage_profile.format(username)
@@ -297,23 +310,6 @@ def manage_profile():
             'address': data[0][6],
             'email': data[0][7]
         })
-
-    # else:
-    #     data = request.get_json()
-    #
-    #     emp_ID = data['empID']
-    #     fname = data['fname']
-    #     lname = data['lname']
-    #     phone = data['phone']
-    #     emails = data['emails']
-    #     query = queries.update_profile.format(emp_ID, fname, lname, phone, emails)
-    #     print(query)
-    #     try:
-    #         cur.execute(query)
-    #         conn.commit()
-    #         return "UPDATE_SUCCESS"
-    #     except:
-    #         return "BIGFATERRO"
 
 @app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
@@ -894,16 +890,16 @@ def v_explore_event():
     all_details = []
 
     eventList = []
+    print(data)
 
     for events in data:
         event = {}
         event['event_name'] = events[0]
         event['site_name'] = events[1]
         event['ticket_price'] = str(events[2])
-        event['event_start'] = str(events[3])
-        event['tickets_remaining'] = str(events[4])
-        event['total_visits'] = str(events[5])
-        event['my_visits'] = str(events[6])
+        event['tickets_remaining'] = str(events[3])
+        event['total_visits'] = str(events[4])
+        event['my_visits'] = str(events[5])
         eventList.append(event)
 
     query2 = queries.get_sites
