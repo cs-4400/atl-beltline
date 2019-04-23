@@ -279,11 +279,11 @@ def transit_history():
 
 @app.route('/e_manage_profile', methods=['GET','POST']) #Screen 17
 def e_manage_profile():
+    username = request.args.get('username')
+    query = queries.manage_profile.format(username=username)
+    cur.execute(query)
+    data = cur.fetchall()
     if request.method == 'GET':
-        username = request.args.get('username')
-        query = queries.manage_profile.format(username=username)
-        cur.execute(query)
-        data = cur.fetchall()
 
         profile = []
 
@@ -307,13 +307,13 @@ def e_manage_profile():
         )
 
     else:
-        data = request.get_json()
+        data2 = request.get_json()
 
-        emp_ID = data['empID']
-        fname = data['fname']
-        lname = data['lname']
-        phone = data['phone']
-        emails = data['emails']
+        emp_ID = data[0][4]
+        fname = data2['fname']
+        lname = data2['lname']
+        phone = data2['phone']
+        emails = data2['emails']
         query = queries.update_profile.format(emp_ID, fname, lname, phone, emails)
         print(query)
         try:
