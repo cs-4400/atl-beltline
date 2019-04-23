@@ -364,7 +364,7 @@ END//
 DROP PROCEDURE IF EXISTS `get_unassigned_managers` //
 CREATE PROCEDURE get_unassigned_managers()
 BEGIN
-    SELECT CONCAT(first_name, " ", last_name) AS manager_name
+    SELECT CONCAT(first_name, " ", last_name) AS manager_name, username as username
     FROM (user
              JOIN (SELECT username FROM employee WHERE emp_type = "Manager") a USING (username))
     WHERE NOT EXISTS(SELECT * FROM site WHERE manager_username = a.username);

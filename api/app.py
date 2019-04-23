@@ -430,6 +430,19 @@ def a_edit_site():
         print(query)
         cur.execute(query)
         data = cur.fetchall()
+
+        query2 = queries.get_unassigned_managers
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        unassignedList = []
+
+        for managers in data2:
+            manager = {}
+            manager['manager_name'] = managers[0]
+            manager['username'] = managers[1]
+            unassignedList.append(manager)
+
         return json.dumps([
             {
                 'manager': data[0][0],
@@ -438,7 +451,8 @@ def a_edit_site():
                 'zipcode': data[0][3],
                 'open': data[0][4]
             },
-            managers
+            managers,
+            unassignedList
         ])
 
 
