@@ -866,9 +866,10 @@ def v_explore_event():
         event['event_name'] = events[0]
         event['site_name'] = events[1]
         event['ticket_price'] = str(events[2])
-        event['tickets_remaining'] = str(events[3])
-        event['total_visits'] = str(events[4])
-        event['my_visits'] = str(events[5])
+        event['event_start'] = str(events[3])
+        event['tickets_remaining'] = str(events[4])
+        event['total_visits'] = str(events[5])
+        event['my_visits'] = str(events[6])
         eventList.append(event)
 
     query2 = queries.get_sites
