@@ -63,6 +63,11 @@ call transit_history(\"{username}\")
 manage_profile = """
 call manage_profile(\"{username}\")
 """
+
+update_profile = """
+call update_profile(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\")
+"""
+
 # manage_profile(IN p_username varchar(50))
 
 # =================================================================

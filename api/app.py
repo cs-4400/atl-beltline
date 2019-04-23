@@ -277,33 +277,51 @@ def transit_history():
         transit_details
     )
 
-@app.route('/e_manage_profile') #Screen 17
+@app.route('/e_manage_profile', methods=['GET','POST']) #Screen 17
 def e_manage_profile():
-    username = request.args.get('username')
-    query = queries.manage_profile.format(username=username)
-    cur.execute(query)
-    data = cur.fetchall()
+    if request.method == 'GET':
+        username = request.args.get('username')
+        query = queries.manage_profile.format(username=username)
+        cur.execute(query)
+        data = cur.fetchall()
 
-    profile = []
+        profile = []
 
-    for users in data:
-        user = {}
-        user['first_name'] = users[0]
-        user['last_name'] = users[1]
-        user['username'] = users[2]
-        user['email'] = users[3]
-        user['emp_ID'] = str(users[4])
-        user['phone'] = users[5]
-        user['address'] = users[6]
-        user['city'] = users[7]
-        user['state'] = users[8]
-        user['zip'] = users[9]
-        user['site_name'] = users[10]
-        profile.append(user)
+        for users in data:
+            user = {}
+            user['first_name'] = users[0]
+            user['last_name'] = users[1]
+            user['username'] = users[2]
+            user['email'] = users[3]
+            user['emp_ID'] = str(users[4])
+            user['phone'] = users[5]
+            user['address'] = users[6]
+            user['city'] = users[7]
+            user['state'] = users[8]
+            user['zip'] = users[9]
+            user['site_name'] = users[10]
+            profile.append(user)
 
-    return json.dumps(
-        profile
-    )
+        return json.dumps(
+            profile
+        )
+
+    else:
+        data = request.get_json()
+
+        emp_ID = data['empID']
+        fname = data['fname']
+        lname = data['lname']
+        phone = data['phone']
+        emails = data['emails']
+        query = queries.update_profile.format(emp_ID, fname, lname, phone, emails)
+        print(query)
+        try:
+            cur.execute(query)
+            conn.commit()
+            return "UPDATE_SUCCESS"
+        except:
+            return "BIGFATERRO"
 
 @app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
