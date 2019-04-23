@@ -1006,9 +1006,9 @@ def v_transit_tranit():
         except:
             print()
     else:
+        site_name = request.args.get('site_name')
         type = request.args.get('type')
-        route = request.args.get('route')
-        query = queries.get_transit_detail.format(type, route)
+        query = queries.get_transit_detail.format(site_name, type)
         cur.execute(query)
         data = cur.fetchall()
 
