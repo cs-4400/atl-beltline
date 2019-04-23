@@ -321,6 +321,28 @@ END//
 #SELECT * FROM site where name='''';   #<= gets all info of this site
 #SELECT * FROM employee where emp_type=''Manager'';    #<= gets all the manager #for the admin to choose
 
+DELIMITER //
+DROP PROCEDURE IF EXISTS `display_edit_site` //
+CREATE PROCEDURE display_edit_site(IN site_name VARCHAR(50))
+BEGIN
+select manager_name, manager_username, address, zipcode, open_everyday
+from
+(select CONCAT(first_name, ' ', last_name) as manager_name, username
+from user where username in (select manager_username from site where name =site_name)) user_t
+join
+(select name, address, zipcode, manager_username, open_everyday
+from site where name = site_name) site_t
+on (user_t.username = site_t.manager_username);
+END //
+# Display manager list:
+DELIMITER //
+DROP PROCEDURE IF EXISTS `get_managers`//
+CREATE PROCEDURE get_managers()
+BEGIN
+SELECT username, CONCAT(first_name, ' ', last_name) as name from user where username in (select username from employee where emp_type = 'Manager');
+END//
+
+
 DROP PROCEDURE IF EXISTS `update_site`//
 CREATE PROCEDURE update_site(IN new_name varchar(50),
                              IN new_zipcode INT, IN new_address varchar(95), IN new_manager varchar(55),
