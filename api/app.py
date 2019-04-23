@@ -925,6 +925,10 @@ def v_event_detail():
             event['event_name'] = events[0]
             event['site_name'] = events[1]
             event['start_date'] = str(events[2])
+            event['description'] = events[3]
+            event['end_date'] = str(events[4])
+            event['ticket_price'] = str(events[5])
+            event['tickets_remaining'] = str(events[6])
             eventDetail.append(event)
 
         return json.dumps(
