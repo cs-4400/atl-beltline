@@ -857,6 +857,8 @@ def v_explore_event():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_details = []
+
     eventList = []
 
     for events in data:
@@ -869,8 +871,23 @@ def v_explore_event():
         event['my_visits'] = str(events[5])
         eventList.append(event)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+
+    all_details.append(eventList)
+    all_details.append(siteList2)
+
     return json.dumps(
-        eventList
+        all_details
     )
 
 # Screen 34
