@@ -900,16 +900,18 @@ END //
 #get_transit_detail:
 DROP PROCEDURE IF EXISTS `get_transit_detail` //
 
-CREATE PROCEDURE get_transit_detail(IN p_type varchar(25), IN p_route varchar(25))
+CREATE PROCEDURE get_transit_detail(IN p_site varchar(25), IN p_type enum("MARTA", "Bus", "Bike"))
 BEGIN
     SELECT transit.route             AS route,
            transit.type              AS type,
            transit.price             AS price,
-           COUNT(connects.site_name) AS connected_sites
-    FROM transit,
+           COUNT(*) AS connected_sites
+    FROM transit join
          connects
-    WHERE transit.route = connects.transit_route
-      AND transit.type = connects.transit_type;
+     on transit.route = connects.transit_route
+      AND transit.type = connects.transit_type
+        where exists (select * from connects where site_name = p_site and transit_route = transit.route and transit_type = transit.type)
+        and transit.type = coalesce(p_type, transit.type) group by transit.route, transit.type;
 END //
 
 
