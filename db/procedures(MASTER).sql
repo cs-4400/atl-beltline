@@ -249,6 +249,22 @@ join (select username, group_concat(email order by email asc separator ', ') as 
 left join site on employee.username = site.manager_username where username = p_username;
 end //
 
+#Task 2: #Update Profile
+drop procedure if exists `update_profile` //
+create procedure update_profile(
+in p_emp_ID int,
+in p_first_name varchar(50),
+in p_last_name varchar(50),
+in p_phone varchar(10),
+in p_emails varchar(255))
+begin
+    declare v_username varchar(50);
+    select username into v_username from employee where emp_ID = p_emp_ID;
+    update user set first_name = p_first_name, last_name = p_last_name where username = v_username;
+    update employee set phone = p_phone where emp_ID = p_emp_ID;
+    call enter_emails(v_username, p_emails);
+end //
+
 #Screen 18: Administrator Manage User(endpoint: ‘/a_manage_user’)
 #Task 1:  #Manage User
 DROP PROCEDURE IF EXISTS `manage_user` //
