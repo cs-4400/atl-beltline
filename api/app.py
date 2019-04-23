@@ -423,6 +423,19 @@ def a_edit_site():
         print(query)
         cur.execute(query)
         data = cur.fetchall()
+
+        query2 = queries.get_unassigned_managers
+        cur.execute(query2)
+        data2 = cur.fetchall()
+
+        unassignedList = []
+
+        for managers in data2:
+            manager = {}
+            manager['manager_name'] = managers[0]
+            manager['username'] = managers[1]
+            unassignedList.append(manager)
+
         return json.dumps([
             {
                 'manager': data[0][0],
@@ -431,7 +444,8 @@ def a_edit_site():
                 'zipcode': data[0][3],
                 'open': data[0][4]
             },
-            managers
+            managers,
+            unassignedList
         ])
 
 
@@ -886,9 +900,10 @@ def v_explore_event():
         event['event_name'] = events[0]
         event['site_name'] = events[1]
         event['ticket_price'] = str(events[2])
-        event['tickets_remaining'] = str(events[3])
-        event['total_visits'] = str(events[4])
-        event['my_visits'] = str(events[5])
+        event['event_start'] = str(events[3])
+        event['tickets_remaining'] = str(events[4])
+        event['total_visits'] = str(events[5])
+        event['my_visits'] = str(events[6])
         eventList.append(event)
 
     query2 = queries.get_sites
@@ -944,6 +959,10 @@ def v_event_detail():
             event['event_name'] = events[0]
             event['site_name'] = events[1]
             event['start_date'] = str(events[2])
+            event['description'] = events[3]
+            event['end_date'] = str(events[4])
+            event['ticket_price'] = str(events[5])
+            event['tickets_remaining'] = str(events[6])
             eventDetail.append(event)
 
         return json.dumps(

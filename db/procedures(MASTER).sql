@@ -364,7 +364,7 @@ END//
 DROP PROCEDURE IF EXISTS `get_unassigned_managers` //
 CREATE PROCEDURE get_unassigned_managers()
 BEGIN
-    SELECT CONCAT(first_name, " ", last_name) AS manager_name
+    SELECT CONCAT(first_name, " ", last_name) AS manager_name, username as username
     FROM (user
              JOIN (SELECT username FROM employee WHERE emp_type = "Manager") a USING (username))
     WHERE NOT EXISTS(SELECT * FROM site WHERE manager_username = a.username);
@@ -816,6 +816,7 @@ BEGIN
     SELECT event.event_name                               AS event_name,
            event.site_name                                as site_name,
            event.event_price                              as ticket_price,
+           event.event_start                              as event_start,
            event.capacity - COALESCE(a.tickets_bought, 0) AS tickets_remaining,
            COALESCE(b.total_visits, 0)                    AS total_visits,
            COALESCE(c.my_visits, 0)                       AS my_visits
