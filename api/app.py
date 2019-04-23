@@ -527,7 +527,28 @@ def a_edit_transit():
             print("ITAINTGOOD, YOUGOTERROR")
 
     else:
+        type = request.args.get('type')
+        route = request.args.get('route')
+
+        query = queries.display_transit.format(type=type, route=route)
+        print(query)
+        cur.execute(query)
+        data = cur.fetchall()
+
+        transit_data = []
         print("IM IN COMPLETE")
+        for transits in data:
+            transit = {}
+            transit['type'] = transits[0]
+            transit['route'] = transits[1]
+            transit['price'] = transits[2]
+            transit['connected_sites'] = [x.strip() for x in transits[3].split(',')]
+            transit_data.append(transit)
+
+        return json.dumps(
+            transit_data
+        )
+
 
 @app.route('/a_create_transit', methods=['POST']) #Screen 24
 def a_create_transit():
