@@ -192,13 +192,11 @@ def register_employee_visitor():
 def takes_transit():
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
-        username = data['username']
+        username = data['usernamea']
         _type = data['type']
         route = data['route']
         transit_date = data['log_date']
         query = log_queries.take_transit.format(username, _type, route, transit_date)
-        print(query)
         try:
             cur.execute(query)
             conn.commit()
@@ -232,8 +230,12 @@ def takes_transit():
             site = {}
             site['name'] = sites[0]
             siteList.append(site)
+
+
         transit_detail.append(transitList)
         transit_detail.append(siteList)
+        print(transit_detail)
+
         return json.dumps(
             transit_detail
         )
@@ -274,30 +276,6 @@ def transit_history():
     return json.dumps(
         transit_details
     )
-# @app.route('/e_manage_profile')
-# def e_manage_profile():
-#     username = request.args.get('username')
-#     query = queries.e_manage_profile.format(username)
-#     cur.execute(query)
-#     data = cur.fetchall()
-#     profile = []
-#     for users in data:
-#         user = {}
-#         user['first_name'] = users[0]
-#         user['last_name'] = users[1]
-#         user['username'] = users[2]
-#         user['email'] = users[3]
-#         user['emp_ID'] = str(users[4])
-#         user['phone'] = users[5]
-#         user['address'] = users[6]
-#         user['city'] = users[7]
-#         user['state'] = users[8]
-#         user['zip'] = users[9]
-#         user['site_name'] = ""
-#         profile.append(user)
-#     return json.dumps(
-#         profile
-#     )
 
 
 @app.route('/manage_profile') #Screen 17
@@ -320,6 +298,23 @@ def manage_profile():
             'email': data[0][7]
         })
 
+    # else:
+    #     data = request.get_json()
+    #
+    #     emp_ID = data['empID']
+    #     fname = data['fname']
+    #     lname = data['lname']
+    #     phone = data['phone']
+    #     emails = data['emails']
+    #     query = queries.update_profile.format(emp_ID, fname, lname, phone, emails)
+    #     print(query)
+    #     try:
+    #         cur.execute(query)
+    #         conn.commit()
+    #         return "UPDATE_SUCCESS"
+    #     except:
+    #         return "BIGFATERRO"
+
 @app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
     if request.method == 'POST':
@@ -340,7 +335,6 @@ def a_manage_user():
         query = queries.manage_user
         cur.execute(query)
         data = cur.fetchall()
-        print(data)
 
         details = []
 
@@ -417,6 +411,7 @@ def a_edit_site():
         new_open = data['new_open']
         old_name = data['old_name']
         query = log_queries.update_site.format(new_name, new_zip, new_address, new_manager, new_open, old_name)
+        print(query)
         cur.execute(query)
         conn.commit()
         return log_queries.updated
@@ -428,7 +423,6 @@ def a_edit_site():
         print(query)
         cur.execute(query)
         data = cur.fetchall()
-        print(data)
         return json.dumps([
             {
                 'manager': data[0][0],
@@ -476,11 +470,10 @@ def a_create_site():
         query = queries.get_unassigned_managers
         cur.execute(query)
         data = cur.fetchall()
-        print(data)
+
         managerList = []
 
         for managers in data:
-            print(managers)
             manager = {}
             manager['manager_name'] = managers[0]
 
@@ -552,7 +545,6 @@ def a_edit_transit():
         sites = data['sites']
         query = queries.update_transit.format(old_type, old_route, new_type,
                                               new_route, new_price, sites)
-        print(query)
         try:
             cur.execute(query)
             conn.commit()
@@ -620,7 +612,6 @@ def m_manage_event():
     eventList = []
 
     for events in data:
-        print(events)
         event = {}
         event['event_name'] = events[0]
         event['staff_count'] = str(events[1])
@@ -740,38 +731,37 @@ def m_create_event():
 @app.route('/m_manage_staff')
 def m_manage_staff():
     site_name = request.args.get('site_name')
-    if len(site_name) > 0:
-        query = queries.filter_staff.format(site_name=site_name)
-        cur.execute(query)
-        data = cur.fetchall()
+    query = queries.filter_staff.format(site_name=site_name)
+    cur.execute(query)
+    data = cur.fetchall()
 
-        staffList = []
+    all_details = []
 
-        for staffs in data:
-            staff = {}
-            staff['staff_name'] = staffs[0]
-            staff['event_shifts'] = str(staffs[1])
-            staffList.append(staff)
+    staffList = []
 
-        return json.dumps(
-            staffList
-        )
-    else:
-        query = queries.get_all_staffs
-        cur.execute(query)
-        data = cur.fetchall()
-        print(data)
-        staffList = []
+    for staffs in data:
+        staff = {}
+        staff['staff_name'] = staffs[0]
+        staff['event_shifts'] = str(staffs[1])
+        staffList.append(staff)
 
-        for staffs in data:
-            staff = {}
-            staff['staff_name'] = staffs[0]
-            staff['event_shifts'] = str(staffs[1])
-            staffList.append(staff)
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
 
-        return json.dumps(
-            staffList
-        )
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+    all_details.append(staffList)
+    all_details.append(siteList2)
+
+    return json.dumps(
+        all_details
+    )
 
 # Screen 29
 @app.route('/m_site_report')
@@ -887,6 +877,8 @@ def v_explore_event():
     cur.execute(query)
     data = cur.fetchall()
 
+    all_details = []
+
     eventList = []
 
     for events in data:
@@ -899,8 +891,23 @@ def v_explore_event():
         event['my_visits'] = str(events[5])
         eventList.append(event)
 
+    query2 = queries.get_sites
+    cur.execute(query2)
+    data2 = cur.fetchall()
+
+    siteList2 = []
+
+    for sites in data2:
+        site = {}
+        site['name'] = sites[0]
+        siteList2.append(site)
+
+
+    all_details.append(eventList)
+    all_details.append(siteList2)
+
     return json.dumps(
-        eventList
+        all_details
     )
 
 # Screen 34

@@ -73,26 +73,26 @@ END //
 #Task 1: Register User
 #register_user
 
-DROP PROCEDURE IF EXISTS `enter_emails` //
-CREATE PROCEDURE enter_emails(IN p_username VARCHAR(50),
-                              IN p_emails VARCHAR(255))
-BEGIN
-    DECLARE big_len INT;
-    DECLARE small_len INT;
-
-    IF p_emails IS NULL THEN
-        SET p_emails = "";
-    END IF;
-
-    WHILE p_emails != '' DO
-    SET big_len = LENGTH(p_emails);
-
-    INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, ',', 1));
-    SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, ',', 1));
-    SET p_emails = MID(p_emails, small_len + 2, big_len);
-    END WHILE;
-
-END //
+-- DROP PROCEDURE IF EXISTS `enter_emails` //
+-- CREATE PROCEDURE enter_emails(IN p_username VARCHAR(50),
+--                               IN p_emails VARCHAR(255))
+-- BEGIN
+--     DECLARE big_len INT;
+--     DECLARE small_len INT;
+--
+--     IF p_emails IS NULL THEN
+--         SET p_emails = "";
+--     END IF;
+--
+--     WHILE p_emails != '' DO
+--     SET big_len = LENGTH(p_emails);
+--
+--     INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, ',', 1));
+--     SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, ',', 1));
+--     SET p_emails = MID(p_emails, small_len + 2, big_len);
+--     END WHILE;
+--
+-- END //
 
 DROP PROCEDURE IF EXISTS `register_helper_1` //
 CREATE PROCEDURE register_helper_1(IN p_username VARCHAR(50),
@@ -249,6 +249,22 @@ join (select username, group_concat(email order by email asc separator ', ') as 
 left join site on employee.username = site.manager_username where username = p_username;
 end //
 
+#Task 2: #Update Profile
+drop procedure if exists `update_profile` //
+create procedure update_profile(
+in p_emp_ID int,
+in p_first_name varchar(50),
+in p_last_name varchar(50),
+in p_phone varchar(10),
+in p_emails varchar(255))
+begin
+    declare v_username varchar(50);
+    select username into v_username from employee where emp_ID = p_emp_ID;
+    update user set first_name = p_first_name, last_name = p_last_name where username = v_username;
+    update employee set phone = p_phone where emp_ID = p_emp_ID;
+    call enter_emails(v_username, p_emails);
+end //
+
 #Screen 18: Administrator Manage User(endpoint: ‘/a_manage_user’)
 #Task 1:  #Manage User
 DROP PROCEDURE IF EXISTS `manage_user` //
@@ -304,6 +320,28 @@ END//
 #Display current site info:
 #SELECT * FROM site where name='''';   #<= gets all info of this site
 #SELECT * FROM employee where emp_type=''Manager'';    #<= gets all the manager #for the admin to choose
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `display_edit_site` //
+CREATE PROCEDURE display_edit_site(IN site_name VARCHAR(50))
+BEGIN
+select manager_name, manager_username, address, zipcode, open_everyday
+from
+(select CONCAT(first_name, ' ', last_name) as manager_name, username
+from user where username in (select manager_username from site where name =site_name)) user_t
+join
+(select name, address, zipcode, manager_username, open_everyday
+from site where name = site_name) site_t
+on (user_t.username = site_t.manager_username);
+END //
+# Display manager list:
+DELIMITER //
+DROP PROCEDURE IF EXISTS `get_managers`//
+CREATE PROCEDURE get_managers()
+BEGIN
+SELECT username, CONCAT(first_name, ' ', last_name) as name from user where username in (select username from employee where emp_type = 'Manager');
+END//
+
 
 DROP PROCEDURE IF EXISTS `update_site`//
 CREATE PROCEDURE update_site(IN new_name varchar(50),
@@ -385,7 +423,7 @@ END //
 #Task 2: update_transit
 #update_transit:
 DROP PROCEDURE IF EXISTS `update_transit` //
-CREATE PROCEDURE update_transit(IN p_old_type varchar(25),
+CREATE PROCEDURE update_transit(IN p_old_type varchar(26),
                                 IN p_old_route varchar(25),
                                 IN p_type varchar(25),
                                 IN p_route varchar(25),
