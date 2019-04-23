@@ -73,26 +73,26 @@ END //
 #Task 1: Register User
 #register_user
 
-DROP PROCEDURE IF EXISTS `enter_emails` //
-CREATE PROCEDURE enter_emails(IN p_username VARCHAR(50),
-                              IN p_emails VARCHAR(255))
-BEGIN
-    DECLARE big_len INT;
-    DECLARE small_len INT;
-
-    IF p_emails IS NULL THEN
-        SET p_emails = "";
-    END IF;
-
-    WHILE p_emails != '' DO
-    SET big_len = LENGTH(p_emails);
-
-    INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, ',', 1));
-    SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, ',', 1));
-    SET p_emails = MID(p_emails, small_len + 2, big_len);
-    END WHILE;
-
-END //
+-- DROP PROCEDURE IF EXISTS `enter_emails` //
+-- CREATE PROCEDURE enter_emails(IN p_username VARCHAR(50),
+--                               IN p_emails VARCHAR(255))
+-- BEGIN
+--     DECLARE big_len INT;
+--     DECLARE small_len INT;
+--
+--     IF p_emails IS NULL THEN
+--         SET p_emails = "";
+--     END IF;
+--
+--     WHILE p_emails != '' DO
+--     SET big_len = LENGTH(p_emails);
+--
+--     INSERT IGNORE INTO user_email (username, email) VALUES (p_username, SUBSTRING_INDEX(p_emails, ',', 1));
+--     SET small_len = LENGTH(SUBSTRING_INDEX(p_emails, ',', 1));
+--     SET p_emails = MID(p_emails, small_len + 2, big_len);
+--     END WHILE;
+--
+-- END //
 
 DROP PROCEDURE IF EXISTS `register_helper_1` //
 CREATE PROCEDURE register_helper_1(IN p_username VARCHAR(50),
