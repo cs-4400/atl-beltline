@@ -155,7 +155,7 @@ call manage_event()
 # =================================================================
 # Screen 26
 m_edit_event = """
-call m_edit_event(\"{}\",\"{}\")
+call m_edit_event(\'{}\',\'{}\')
 """
 # m_edit_event(IN p_event_name varchar(50), IN p_event_start date, IN p_site_name varchar(50))
 
@@ -164,8 +164,12 @@ call event_report(\"{}\",\"{}\",\"{}\")
 """
 # event_report(IN e_name varchar(50), IN s_date date, IN price decimal(10, 2))
 
+delete_event = """
+DELETE FROM event where event_name = \'{}\' and event_start = \'{}\'
+"""
+
 update_event = """
-call update_event(\"{}\",\"{}\", \"{}\",\"{}\")
+call update_event(\'{}\',\'{}\', \'{}\',\'{}\')
 """
 # update_event(IN e_name varchar(50), IN s_date date, IN new_description varchar(255),
 #                               IN staff_assigned varchar(255))
@@ -203,14 +207,18 @@ call filter_staff(\"{site_name}\")
 # =================================================================
 # Screen 29
 get_site_report = """
-call get_site_report(\"{site_name}\",\"{start_date}\",\"{end_date}\")
+call get_site_report(\"{}\",\"{}\",\"{}\")
+"""
+
+get_site_name = """
+select name from site where manager_username = '\{}\'
 """
 # get_site_report(IN p_site_name varchar(50), IN p_start_date date, IN p_end_date date)
 
 # =================================================================
 # Screen 30
 get_daily_detail = """
-call get_daily_detail(\"{manager_username}\",\"{site}\",\"{date}\")
+call get_daily_detail(\"{}\",\"{}\",\"{}\")
 """
 # get_daily_detail(IN p_manager_username varchar(50), IN p_site varchar(50), IN p_date date)
 # =================================================================
@@ -241,7 +249,7 @@ call get_event_detail(\'{}\', \'{}\', \'{}\')
 # get_event_detail(IN p_name varchar(50), IN p_site_name varchar(50), IN p_start_date date)
 
 log_event_visit = """
-call log_event_visit(\"{}\",\"{}\",\"{}\", \"{}\, \"{}\)
+call log_event_visit(\'{}\',\'{}\',\'{}\', \'{}\', \'{}\')
 """
 # log_event_visit(
 #     IN p_username varchar(50),

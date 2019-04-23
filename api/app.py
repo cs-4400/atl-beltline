@@ -277,39 +277,47 @@ def transit_history():
         transit_details
     )
 
-
-@app.route('/manage_profile', methods=['GET', 'POST']) #Screen 17
-def manage_profile():
-    if request.method == 'POST':
-        data = request.get_json()
-        emp_id = data['emp_id']
-        fname = data['fname']
-        lname = data['lname']
-        phone = data['phone']
-        emails = data['emails']
-        query = queries.update_profile.format(emp_id, fname, lname, phone, emails)
-        print(query)
-        try:
-            cur.execute(query)
-            conn.commit()
-            return "UPDATE SUCCESS"
-        except:
-            return "CANT UPDATE"
-    else:
+@app.route('/e_manage_profile', methods=['GET','POST']) #Screen 17
+def e_manage_profile():
+    if request.method == 'GET':
+        username = request.args.get('username')
         username = request.args.get('username')
         query = queries.manage_profile.format(username)
         cur.execute(query)
         data = cur.fetchall()
-        return json.dumps({
-            'fname': data[0][0],
-            'lname': data[0][1],
-            'username': data[0][2],
-            'site_name': data[0][3],
-            'emp_id': data[0][4],
-            'phone': data[0][5],
-            'address': data[0][6],
-            'email': data[0][7]
-        })
+        print(data)
+        profile = []
+        for users in data:
+            user = {}
+            user['first_name'] = users[0]
+            user['last_name'] = users[1]
+            user['username'] = users[2]
+            user['site_name'] = users[3]
+            user['emp_ID'] = str(users[4])
+            user['phone'] = users[5]
+            user['address'] = users[6]
+            user['email'] = users[7]
+            profile.append(user)
+
+        return json.dumps(
+            profile
+        )
+
+    else:
+        data2 = request.get_json()
+        fname = data2['fname']
+        lname = data2['lname']
+        phone = data2['phone']
+        emails = data2['emails']
+        emp_ID = data2['emp_id']
+        query = queries.update_profile.format(emp_ID, fname, lname, phone, emails)
+        print(query)
+        try:
+            cur.execute(query)
+            conn.commit()
+            return "UPDATE_SUCCESS"
+        except:
+            return "BIGFATERRO"
 
 @app.route('/a_manage_user', methods=['GET', 'POST']) #Screen 18
 def a_manage_user():
@@ -407,7 +415,6 @@ def a_edit_site():
         new_open = data['new_open']
         old_name = data['old_name']
         query = log_queries.update_site.format(new_name, new_zip, new_address, new_manager, new_open, old_name)
-        print(query)
         cur.execute(query)
         conn.commit()
         return log_queries.updated
@@ -613,8 +620,20 @@ def a_create_transit():
         return json.dumps(sites)
 
 
-@app.route('/m_manage_event') #Screen 25
+@app.route('/m_manage_event', methods=['GET', 'DELETE']) #Screen 25
 def m_manage_event():
+    if request.method == 'DELETE':
+        event_name = request.args.get('event_name')
+        event_start = request.args.get('event_start')
+        query = queries.delete_event.format(event_name, event_start)
+        print(query)
+        try:
+            cur.execute(query)
+            conn.commit()
+            return "DELETE SUCCESSFUL"
+        except:
+            return "DELETE FAILED"
+
     query = queries.manage_event
     cur.execute(query)
     data = cur.fetchall()
@@ -622,6 +641,7 @@ def m_manage_event():
     eventList = []
 
     for events in data:
+        print(events)
         event = {}
         event['event_name'] = events[0]
         event['staff_count'] = str(events[1])
@@ -629,13 +649,14 @@ def m_manage_event():
         event['total_visits'] = str(events[3])
         event['total_revenue'] = str(events[4])
         event['start_date'] = str(events[5])
+        event['site_name'] = events[6]
         eventList.append(event)
 
     return json.dumps(
         eventList
     )
 
-@app.route('/m_edit_event', methods=['GET', 'POST']) #Screen 26
+@app.route('/m_edit_event', methods=['GET', 'POST', 'DELETE']) #Screen 26
 def m_edit_event():
     if request.method == 'POST':
         data = request.get_json()
@@ -656,14 +677,15 @@ def m_edit_event():
         event_name = request.args.get('event_name')
         event_date = request.args.get('event_start')
         query1 = queries.m_edit_event.format(event_name, event_date)
+        print(query1)
         cur.execute(query1)
         data1 = cur.fetchall()
-        print(data1)
+        # print(data1)
 
         event_report = []
 
         event_detail = []
-
+        print(data1)
         for details in data1:
             detail = {}
             detail['event_name'] = details[0]
@@ -689,6 +711,7 @@ def m_edit_event():
             day['price'] = str(days[2])
             revenue.append(day)
 
+        print(data3)
         event_report.append(event_detail)
         event_report.append(revenue)
 
@@ -730,6 +753,7 @@ def m_create_event():
         for staffs in data:
             staff = {}
             staff['staff_name'] = staffs[0]
+            staff['username'] = staffs[1]
             staffList.append(staff)
 
         return json.dumps(
@@ -776,15 +800,16 @@ def m_manage_staff():
 # Screen 29
 @app.route('/m_site_report')
 def m_site_report():
-    site_name = request.args.get('site_name')
+    manager_name = request.args.get('username')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    query = queries.get_site_report.format(site_name=site_name, start_date=start_date, end_date=end_date)
+    cur.execute(queries.get_site_name.format(manager_name))
+    site_name = cur.fetchall()[0][0]
+
+    query = queries.get_site_report.format(site_name, start_date, end_date)
     cur.execute(query)
-    data = cur.fetchall()
-
     report = []
-
+    data = cur.fetchall()
     for sites in data:
         site = {}
         site['date'] = str(sites[0])
@@ -803,9 +828,10 @@ def m_site_report():
 @app.route('/m_daily_detail')
 def m_daily_detail():
     manager_username = request.args.get('manager_username')
-    site = request.args.get('site')
+    cur.execute(queries.get_site_name.format(manager_username))
+    site_name = cur.fetchall()[0][0]
     date = request.args.get('date')
-    query = queries.get_daily_detail.format(manager_username=manager_username, site=site, date=date)
+    query = queries.get_daily_detail.format(manager_username, site_name, date)
     cur.execute(query)
     data = cur.fetchall()
 
@@ -897,7 +923,8 @@ def v_explore_event():
         event['event_name'] = events[0]
         event['site_name'] = events[1]
         event['ticket_price'] = str(events[2])
-        event['tickets_remaining'] = str(events[3])
+        event['event_start'] = str(events[3])
+        event['tickets_remaining'] = events[6]
         event['total_visits'] = str(events[4])
         event['my_visits'] = str(events[5])
         eventList.append(event)
@@ -931,7 +958,8 @@ def v_event_detail():
         event_start = data['event_start']
         site_name = data['site_name']
         visit_date = data['visit_date']
-        query = queries.log_event_visit(username, event_name, event_start, site_name, visit_date)
+        query = queries.log_event_visit.format(username, event_name, event_start, site_name, visit_date)
+        print(query)
         try:
             cur.execute(query)
             conn.commit()
@@ -949,6 +977,7 @@ def v_event_detail():
         data = cur.fetchall()
         print(data)
         eventDetail = []
+        print(data)
 
         for events in data:
             event = {}
@@ -958,7 +987,7 @@ def v_event_detail():
             event['description'] = events[3]
             event['end_date'] = str(events[4])
             event['ticket_price'] = str(events[5])
-            event['tickets_remaining'] = str(events[6])
+            event['event_start'] = str(events[6])
             eventDetail.append(event)
 
         return json.dumps(

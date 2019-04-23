@@ -1,4 +1,4 @@
-#CS 4400 Phase 3 Task List
+*#CS 4400 Phase 3 Task List
 
 #SQL Statement Calls:
 
@@ -197,12 +197,16 @@ END //
 #Task 1: Show Transits
 #get_transits:
 DROP PROCEDURE IF EXISTS `get_transits`//
-CREATE PROCEDURE get_transits()
+CREATE PROCEDURE get_transits(
+IN p_contain_site varchar(50),
+IN p_type enum("MARTA", "Bus", "Bike"),
+IN p_price_low float,
+IN p_price_high float)
 BEGIN
     SELECT transit.route, transit.type, transit.price, COUNT(*) AS connected_sites
     FROM (transit
-             JOIN connects ON transit.type = connects.transit_type AND transit.route = connects.transit_route)
-    GROUP BY route, type;
+             JOIN (select * from connects where site_name = coalesce(p_contain_site, site_name)) a ON transit.type = a.transit_type AND transit.route = a.transit_route)
+    WHERE transit.price < COALESCE(p_price_high, transit.price + 1.0) AND transit.price > COALESCE(p_price_low, transit.price - 1.0) AND transit.type = COALESCE(p_type, transit.type) GROUP BY route, type ORDER BY p_order_by;
 END //
 
 #Task 2: Log Transit
@@ -224,7 +228,13 @@ END //
 #Task 1: View Transit History
 #User_View_History:
 DROP PROCEDURE IF EXISTS `transit_history` //
-CREATE PROCEDURE transit_history(IN p_username varchar(50))
+CREATE PROCEDURE transit_history(
+IN p_username varchar(50),
+IN p_type enum("MARTA","Bus","Bike"),
+IN p_route varchar(25),
+IN p_contain_site varchar(50),
+IN p_start_date date,
+IN p_end_date date)
 BEGIN
     SELECT take_transit.date  as date,
            take_transit.route as route,
@@ -234,7 +244,12 @@ BEGIN
          transit
     WHERE username = p_username
       and transit.type = take_transit.type
-      and transit.route = take_transit.route;
+      and transit.route = take_transit.route
+      and transit.type = coalesce(p_type, transit.type)
+      and transit.route = coalesce(p_route, transit.route)
+      and take_transit.site_name = coalesce(p_contain_site, take_transit.site_name)
+      and take_transit.date > coalesce(p_start_date, date_sub(take_transit.date, interval 1 day))
+      and take_transit.date < coalesce(p_end_date, date_add(take_transit.date, interval 1 day));
 END//
 
 #Screen 17: Employee Manage Profile (endpoint: ‘/e_manage_profile’)
@@ -268,7 +283,10 @@ end //
 #Screen 18: Administrator Manage User(endpoint: ‘/a_manage_user’)
 #Task 1:  #Manage User
 DROP PROCEDURE IF EXISTS `manage_user` //
-CREATE PROCEDURE manage_user()
+CREATE PROCEDURE manage_user(
+in p_username varchar(50),
+in p_type enum("User", "Visitor", "Staff", "Manager"),
+in p_status enum("Approved","Pending","Declined"))
 begin
     SELECT uname1 AS username,
            email_count,
@@ -282,7 +300,7 @@ begin
          (SELECT user_type,
                  status,
                  username AS uname2
-          FROM user) user_t ON (email_t.uname1 = user_t.uname2);
+          FROM user) user_t ON (email_t.uname1 = user_t.uname2) where username like coalesce(p_username, username) and user_type = coalesce(p_type, user_type) and status = coalesce(p_status, status);
 END//
 # approve user
 
@@ -299,7 +317,10 @@ END //
 #Screen 19: Administrator Manage Site(endpoint: ‘/a_manage_site’)
 #Task 1: #Manage Site
 DROP PROCEDURE IF EXISTS `manage_site`//
-CREATE PROCEDURE manage_site()
+CREATE PROCEDURE manage_site(
+in p_site varchar(50),
+in p_manager_name varchar(50),
+in p_open_everyday enum("Yes","No"))
 BEGIN
     SELECT site_name,
            name,
@@ -311,7 +332,7 @@ BEGIN
              JOIN
          (SELECT CONCAT(first_name, ' ', last_name) AS name,
                  username                             AS uname2
-          FROM user) user_t ON (site_t.uname1 = user_t.uname2);
+          FROM user where name = coalesce(p_manager_name, name)) user_t ON (site_t.uname1 = user_t.uname2) where site_name = coalesce(p_site, site_name) and open_everyday = coalesce(p_open_everyday, open_everyday);
 END//
 
 
@@ -320,28 +341,6 @@ END//
 #Display current site info:
 #SELECT * FROM site where name='''';   #<= gets all info of this site
 #SELECT * FROM employee where emp_type=''Manager'';    #<= gets all the manager #for the admin to choose
-
-DELIMITER //
-DROP PROCEDURE IF EXISTS `display_edit_site` //
-CREATE PROCEDURE display_edit_site(IN site_name VARCHAR(50))
-BEGIN
-select manager_name, manager_username, address, zipcode, open_everyday
-from
-(select CONCAT(first_name, ' ', last_name) as manager_name, username
-from user where username in (select manager_username from site where name =site_name)) user_t
-join
-(select name, address, zipcode, manager_username, open_everyday
-from site where name = site_name) site_t
-on (user_t.username = site_t.manager_username);
-END //
-# Display manager list:
-DELIMITER //
-DROP PROCEDURE IF EXISTS `get_managers`//
-CREATE PROCEDURE get_managers()
-BEGIN
-SELECT username, CONCAT(first_name, ' ', last_name) as name from user where username in (select username from employee where emp_type = 'Manager');
-END//
-
 
 DROP PROCEDURE IF EXISTS `update_site`//
 CREATE PROCEDURE update_site(IN new_name varchar(50),
@@ -364,7 +363,7 @@ END//
 DROP PROCEDURE IF EXISTS `get_unassigned_managers` //
 CREATE PROCEDURE get_unassigned_managers()
 BEGIN
-    SELECT CONCAT(first_name, " ", last_name) AS manager_name, username as username
+    SELECT CONCAT(first_name, " ", last_name) AS manager_name
     FROM (user
              JOIN (SELECT username FROM employee WHERE emp_type = "Manager") a USING (username))
     WHERE NOT EXISTS(SELECT * FROM site WHERE manager_username = a.username);
@@ -382,20 +381,25 @@ END//
 #Task 1: #Manage Transit
 #manage_transit:
 DROP PROCEDURE IF EXISTS `manage_transit`//
-CREATE PROCEDURE manage_transit()
+CREATE PROCEDURE manage_transit(
+in p_type enum("MARTA","Bus","Bike"),
+in p_route varchar(25),
+in p_site varchar(25),
+in p_price_low float,
+in p_price_high float)
 BEGIN
     Select type, route, price, coalesce(num_sites, 0) as num_sites, coalesce(num_log, 0) as num_log
     from (Select type, route, price, num_sites
           from (Select * from transit) transit_t
                    left join
                (select transit_type, transit_route, count(*) as num_sites
-                from connects
+                from (select * from connects where site_name = coalesce(p_site, site_name))
                 group by transit_type, transit_route) connect_t
                on (transit_t.type = connect_t.transit_type and transit_t.route = connect_t.transit_route)) t_1
 
              left join
          (select type as t_type, route as t_route, count(*) as num_log from take_transit group by type, route) t_2
-         on (t_1.type = t_2.t_type and t_1.route = t_2.t_route);
+         on (t_1.type = t_2.t_type and t_1.route = t_2.t_route) where route = coalesce(p_route, route) and type = coalesce(p_type, type) and price > coalesce(p_price_low, price - 1.0) and price < coalesce(p_price_high, price + 1.0);
 END//
 #Task 2: Delete Transit
 #delete_transit:
@@ -423,7 +427,7 @@ END //
 #Task 2: update_transit
 #update_transit:
 DROP PROCEDURE IF EXISTS `update_transit` //
-CREATE PROCEDURE update_transit(IN p_old_type varchar(26),
+CREATE PROCEDURE update_transit(IN p_old_type varchar(25),
                                 IN p_old_route varchar(25),
                                 IN p_type varchar(25),
                                 IN p_route varchar(25),
@@ -486,14 +490,24 @@ END //
 #Task 1: Manage Event
 #manage_event:
 DROP PROCEDURE IF EXISTS `manage_event` //
-CREATE PROCEDURE manage_event()
+CREATE PROCEDURE manage_event(
+in p_event_name varchar(50),
+in p_keyword varchar(255),
+in p_start_date date,
+in p_end_date date,
+in p_duration_low int,
+in p_duration_high int,
+in p_visits_low int,
+in p_visits_high int,
+in p_revenue_low float,
+in p_revenue_high float)
 BEGIN
-    SELECT event.event_name,
+    SELECT f.event_name,
            c.staff_count,
            b.duration,
            COALESCE(a.total_visits, 0)  AS total_visits,
            COALESCE(a.total_revenue, 0) AS total_revenue
-    FROM event
+    FROM (select * from event where description like coalesce(p_keyword, description) and event_start <= coalesce(p_end_date, date_add(event_start, interval 1 day)) and end_date >= coalesce(p_start_date, date_sub(end_date, interval 1 day)) and event_name like coalesce(p_event_name, event_name)) f
              LEFT JOIN (SELECT event_name,
                                event_start,
                                site_name,
@@ -506,7 +520,7 @@ BEGIN
                         FROM event) b USING (event_name, event_start, site_name)
              LEFT JOIN (SELECT event_name, event_start, site_name, COUNT(*) AS staff_count
                         FROM assign_to
-                        GROUP BY event_name, event_start, site_name) c USING (event_name, event_start, site_name);
+                        GROUP BY event_name, event_start, site_name) c USING (event_name, event_start, site_name) where b.duration > coalesce(p_duration_low, b.duration - 1) and b.duration < coalesce(p_duration_high, b.duration + 1) and total_visits > coalesce(p_visits_low, total_visits - 1) and total_visits < coalesce(p_visits_high, total_visits + 1) and total_revenue > coalesce(p_revenue_low, total_revenue - 1) and total_revenue < coalesce(p_revenue_high, total_revenue + 1);
 END //
 
 #Screen 26: Manager View/Edit Event (endpoint: ‘/m_edit_event’)
@@ -540,12 +554,13 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS `event_report` //
-CREATE PROCEDURE event_report(IN e_name VARCHAR(50), IN s_date DATE, IN price DECIMAL(10, 2))
+CREATE PROCEDURE event_report(IN e_name VARCHAR(50), IN s_date DATE,
+in visits_low int, in visits_high int, in revenue_low float, in revenue_high int)
 BEGIN
-    SELECT visit_date, count(*) visits, count(*) * price
-    from visit_event
+    SELECT visit_event.visit_date, count(*) visits, count(*) * event.event_price as revenue
+    from (visit_event join event using (event_name, event_start, site_name))
     where event_name = e_name
-      and event_start = s_date
+      and event_start = s_date and visits < coalesce(visits_high, visits + 1) and visits > coalesce(visits_low, visits - 1) and revenue < coalesce(revenue_high, revenue + 1) and revenue > coalesce(revenue_low, revenue - 1)
     GROUP BY visit_date
     order by visit_date;
 END//
@@ -643,14 +658,18 @@ END //
 DROP PROCEDURE IF EXISTS `filter_staff` //
 
 CREATE PROCEDURE filter_staff(
-    IN p_site_name varchar(50))
+    IN p_site_name varchar(50),
+    in p_fname varchar(50),
+    in p_lname varchar(50),
+    in s_date date,
+    in e_date date)
 BEGIN
     SELECT b.staff_name, a.event_shifts
-    FROM (SELECT staff_username as username, COUNT(*) AS event_shifts
-          FROM assign_to
-          WHERE site_name = p_site_name
+    FROM (SELECT assign_to.staff_username as username, COUNT(*) AS event_shifts
+          FROM (assign_to join event using (event_name, event_start, site_name))
+          WHERE site_name = p_site_name and event.event_start <= coalesce(e_date, date_add(event.event_start, interval 1 day)) and event.end_date >= coalesce(s_date, date_sub(event.end_date, interval 1 day))
           GROUP BY username) a
-             join (SELECT username, CONCAT(first_name, " ", last_name) AS staff_name FROM user) b USING (username);
+             join (SELECT username, CONCAT(first_name, " ", last_name) AS staff_name FROM user where first_name like coalesce(p_fname, first_name) and last_name like coalesce(p_lname, last_name)) b USING (username);
 END //
 
 #Screen 29: Manager Site Report (endpoint: ‘/m_site_report’)
@@ -659,7 +678,15 @@ END //
 DROP PROCEDURE IF EXISTS `get_site_report` //
 CREATE PROCEDURE get_site_report(IN p_site_name varchar(50),
                                  IN p_start_date date,
-                                 IN p_end_date date)
+                                 IN p_end_date date,
+                                 in event_low int,
+                                 in event_high int,
+                                 in staff_low int,
+                                 in staff_high int,
+                                 in visits_low int,
+                                 in visits_high int,
+                                 in revenue_low float,
+                                 in revenue_high float)
 BEGIN
     DROP TABLE IF EXISTS dates;
     CREATE TABLE dates AS
@@ -719,6 +746,10 @@ where date between p_start_date and p_end_date;
                         WHERE site_name = p_site_name
                           AND dates.date BETWEEN event.event_start AND event.end_date
                         GROUP BY date) d USING (date)
+    where event_count >= coalesce(event_low, event_count - 1) and event_count <= coalesce(event_high, event_count + 1)
+        and staff_count >= coalesce(staff_low, staff_count - 1) and staff_count <= coalesce(staff_high, staff_count + 1)
+        and total_visits >= coalesce(visits_low, total_visits - 1) and total_visits <= coalesce(visits_high, total_visits + 1)
+        and total_revenue >= coalesce(revenue_low, total_revenue - 1) and total_revenue <= coalesce(revenue_high, total_revenue + 1)
     ORDER BY date ASC;
 
     DROP TABLE dates;
@@ -761,10 +792,14 @@ END //
 #get_schedule:
 DROP PROCEDURE IF EXISTS `get_schedule` //
 
-CREATE PROCEDURE get_schedule(IN p_staff_username varchar(50))
+CREATE PROCEDURE get_schedule(IN p_staff_username varchar(50),
+in p_event_name varchar(50),
+in p_keyword varchar(255),
+in s_date date,
+in e_date date)
 BEGIN
-    SELECT event.event_name, event.site_name, event.event_start AS start_date, event.end_date, a.staff_count
-    FROM event
+    SELECT c.event_name, c.site_name, c.event_start AS start_date, c.end_date, a.staff_count
+    FROM (select * from event where event_name like coalesce(p_event_name, event_name) and description like coalesce(p_keyword, description) and event_start <= coalesce(e_date, date_add(event_start, interval 1 day)) and end_date >= coalesce(s_date, date_sub(end_date, interval 1 day))) c
              JOIN (SELECT event_name, site_name, event_start, COUNT(event_name) AS staff_count
                    FROM assign_to
                    GROUP BY event_name, site_name, event_start) a USING (event_name, site_name, event_start)
@@ -811,12 +846,20 @@ END //
 #explore_event:
 DROP PROCEDURE IF EXISTS `explore_event` //
 
-CREATE PROCEDURE explore_event(IN p_username varchar(50))
+CREATE PROCEDURE explore_event(IN p_username varchar(50),
+in p_event varchar(50),
+in p_keyword varchar(255),
+in p_site varchar(50),
+in s_date date,
+in e_date date,
+in visits_low int,
+in visits_high int,
+in price_low float,
+in price_high float)
 BEGIN
     SELECT event.event_name                               AS event_name,
            event.site_name                                as site_name,
            event.event_price                              as ticket_price,
-           event.event_start                              as event_start,
            event.capacity - COALESCE(a.tickets_bought, 0) AS tickets_remaining,
            COALESCE(b.total_visits, 0)                    AS total_visits,
            COALESCE(c.my_visits, 0)                       AS my_visits
@@ -830,7 +873,11 @@ BEGIN
              LEFT JOIN (SELECT event_name, site_name, event_start, COUNT(*) AS my_visits
                         FROM visit_event
                         WHERE username = p_username
-                        GROUP BY event_name, site_name, event_start) c USING (event_name, site_name, event_start);
+                        GROUP BY event_name, site_name, event_start) c USING (event_name, site_name, event_start)
+        where event_name like coalesce(p_event, event_name) and event.description like coalesce(p_keyword, event.description) and event.site_name = p_site
+        and event.event_start <= coalesce(e_date, date_add(event.event_start, interval 1 day)) and event.end_date >= coalesce(s_date, date_sub(event.end_date, interval 1 day))
+        and total_visits >= coalesce(visits_low, total_visits - 1) and total_visits <= coalesce(visits_high, total_visits + 1)
+        and event.event_price >= coalesce(price_low, event.event_price - 1) and event.event_price <= coalesce(price_high, event.event_price + 1);
 END //
 
 #Screen 34: Visitor Event Detail (endpoint: ‘/v_event_detail’) #TODO: FIX
@@ -895,7 +942,15 @@ END //
 #explore_site:
 DROP PROCEDURE IF EXISTS `explore_site` //
 
-CREATE PROCEDURE explore_site(IN p_username varchar(50))
+CREATE PROCEDURE explore_site(IN p_username varchar(50),
+in p_site varchar(50),
+in p_open_everyday enum("Yes","No"),
+in s_date date,
+in e_date date,
+in visits_low int,
+in visits_high int,
+in events_low int,
+in events_high int)
 BEGIN
     SELECT site.name                                                            AS site_name,
            COALESCE(a.event_count, 0)                                           AS event_count,
@@ -909,12 +964,15 @@ BEGIN
                        USING (name)
              LEFT JOIN (SELECT site_name as name, COUNT(*) AS my_event_visits
                         FROM visit_event
-                        WHERE username = p_username
+                        WHERE username = p_username and visit_date between coalesce(s_date, date_sub(visit_date, interval 1 day)) and coalesce(e_date, date_add(visit_date, interval 1 day))
                         GROUP BY name) d USING (name)
              LEFT JOIN (SELECT site_name as name, COUNT(*) AS my_site_visits
                         FROM visit_site
                         WHERE username = p_username
-                        GROUP BY name) e USING (name);
+                        GROUP BY name) e USING (name)
+        where site_name = coalesce(p_site, site_name) and site.open_everyday = coalesce(p_open_everyday, site.open_everyday)
+        and total_visits >= coalesce(visits_low, total_visits - 1) and total_visits <= coalesce(visits_high, total_visits + 1)
+        and event_count >= coalesce(events_low, event_count - 1) and event_count <= coalesce(events_high, event_count + 1);
 END //
 
 
@@ -947,7 +1005,7 @@ CREATE PROCEDURE log_transit(IN p_username varchar(50),
                              IN p_route varchar(25),
                              IN p_transit_date date)
 BEGIN
-    INSERT INTO take_transit (username, type, route, date) VALUES (p_username, p_type, p_route, p_transit_date);
+    INSERT IGNORE INTO take_transit (username, type, route, date) VALUES (p_username, p_type, p_route, p_transit_date);
 END //
 
 #Screen 37: Visitor Site Detail (endpoint: ‘/v_site_detail’)
@@ -981,11 +1039,18 @@ END //
 
 drop procedure if exists `filter_visit_history` //
 create procedure filter_visit_history(
-in p_username varchar(50))
+in p_username varchar(50),
+in p_event varchar(50),
+in p_site varchar(50),
+in s_date date,
+in e_date date)
 begin
+select * from (
 (select visit_event.visit_date, event.event_name, event.site_name, event.event_price from (event join visit_event using (event_name, event_start, site_name)) where visit_event.username = p_username)
 union all
-(select visit_date, "" as event_name, site_name, 0 as event_price from visit_site where username = p_username);
+(select visit_date, "" as event_name, site_name, 0 as event_price from visit_site where username = p_username)) a
+    where visit_date between coalesce(s_date, date_sub(visit_date, interval 1 day)) and coalesce(e_date, date_add(visit_date, interval 1 day))
+    and event_name like coalesce(p_event, event_name) and site_name = coalesce(p_site, site_name);
 end //
 
 DELIMITER ;
