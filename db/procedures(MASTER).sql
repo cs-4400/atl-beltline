@@ -321,6 +321,28 @@ END//
 #SELECT * FROM site where name='''';   #<= gets all info of this site
 #SELECT * FROM employee where emp_type=''Manager'';    #<= gets all the manager #for the admin to choose
 
+DELIMITER //
+DROP PROCEDURE IF EXISTS `display_edit_site` //
+CREATE PROCEDURE display_edit_site(IN site_name VARCHAR(50))
+BEGIN
+select manager_name, manager_username, address, zipcode, open_everyday
+from
+(select CONCAT(first_name, ' ', last_name) as manager_name, username
+from user where username in (select manager_username from site where name =site_name)) user_t
+join
+(select name, address, zipcode, manager_username, open_everyday
+from site where name = site_name) site_t
+on (user_t.username = site_t.manager_username);
+END //
+# Display manager list:
+DELIMITER //
+DROP PROCEDURE IF EXISTS `get_managers`//
+CREATE PROCEDURE get_managers()
+BEGIN
+SELECT username, CONCAT(first_name, ' ', last_name) as name from user where username in (select username from employee where emp_type = 'Manager');
+END//
+
+
 DROP PROCEDURE IF EXISTS `update_site`//
 CREATE PROCEDURE update_site(IN new_name varchar(50),
                              IN new_zipcode INT, IN new_address varchar(95), IN new_manager varchar(55),
@@ -342,7 +364,7 @@ END//
 DROP PROCEDURE IF EXISTS `get_unassigned_managers` //
 CREATE PROCEDURE get_unassigned_managers()
 BEGIN
-    SELECT CONCAT(first_name, " ", last_name) AS manager_name
+    SELECT CONCAT(first_name, " ", last_name) AS manager_name, username as username
     FROM (user
              JOIN (SELECT username FROM employee WHERE emp_type = "Manager") a USING (username))
     WHERE NOT EXISTS(SELECT * FROM site WHERE manager_username = a.username);
@@ -794,6 +816,7 @@ BEGIN
     SELECT event.event_name                               AS event_name,
            event.site_name                                as site_name,
            event.event_price                              as ticket_price,
+           event.event_start                              as event_start,
            event.capacity - COALESCE(a.tickets_bought, 0) AS tickets_remaining,
            COALESCE(b.total_visits, 0)                    AS total_visits,
            COALESCE(c.my_visits, 0)                       AS my_visits
